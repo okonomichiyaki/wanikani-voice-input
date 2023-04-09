@@ -1,0 +1,34 @@
+
+export function createRecognition(lang, callback) {
+  if (!('webkitSpeechRecognition' in window)) {
+    console.error('[wanikani-voice-input] web speech not supported by this browser!');
+    return null;
+  }
+  const recognition = new webkitSpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = lang;
+  recognition.onresult = (event) => {
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const transcript = event.results[i][0].transcript.trim();
+      const final = event.results[i].isFinal;
+      callback(recognition, transcript, final);
+    }
+  };
+  recognition.onerror = (event) => {
+    console.error('[wanikani-voice-input] error occurred in recognition:', event.error);
+  };
+  recognition.onend = () => {
+    console.log('[wanikani-voice-input] recognition onend, restarting');
+    recognition.start();
+  };
+  return recognition;
+}
+
+export function setLanguage(recognition, newLanguage) {
+  if (recognition.lang != newLanguage) {
+    console.log('[wanikani-voice-input] setting language', newLanguage);
+    recognition.stop();
+    recognition.lang = newLanguage;
+  }
+}
