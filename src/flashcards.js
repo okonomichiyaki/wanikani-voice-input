@@ -11,7 +11,7 @@ function lookup(s) {
   return [];
 }
 
-const overrides = {
+const homonyms = {
   '1000': 'せん',
   'ワーく': 'わく',
   'ezone': 'いぞん',
@@ -21,7 +21,9 @@ const overrides = {
   'ec': 'いし',
   'x': 'じゅ',
   '10': 'じゅ',
-  'agar': 'あがる'
+  '3': 'さん',
+  'agar': 'あがる',
+  '西国': 'さいこく'
 };
 
 function getReadings(entries) {
@@ -43,7 +45,7 @@ function getReadings(entries) {
 }
 
 function readingMatches(transcript, normalized, prompt, readings) {
-  return transcript === prompt || normalized === prompt || readings.some(r => r === normalized || r === overrides[normalized]);
+  return transcript === prompt || normalized === prompt || readings.some(r => r === normalized || r === homonyms[normalized]);
 }
 
 function normalize(s) {
