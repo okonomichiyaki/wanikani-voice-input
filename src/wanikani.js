@@ -1,8 +1,26 @@
 // standalone functions to interact with WaniKani web app
 
+const Selectors = {
+  Category: 'span.quiz-input__question-category',
+  Type: 'span.quiz-input__question-type',
+  Prompt: 'div.character-header__characters',
+  Synonyms: '#quiz-user-synonyms script',
+  Subjects: '#quiz-queue > script[data-quiz-queue-target="subjects"]',
+  Next: 'div.quiz-input__input-container button',
+};
+
+export function checkDom() {
+  for (const selector of Object.keys(Selectors)) {
+    const el = document.querySelector(Selectors[selector]);
+    if (!el) {
+      console.error(`[wanikani-voice-input] failed to find ${selector}: ${Selectors[selector]}`);
+    }
+  }
+}
+
 // returns `radical`, `kanji`, or `vocabulary`
 function getCategory() {
-  const category = document.querySelector('#turbo-body > div.quiz > div.quiz-input > label > span.quiz-input__question-category');
+  const category = document.querySelector(Selectors.Category);
   if (category) {
     return category.textContent.trim().toLowerCase();
   }
@@ -11,7 +29,7 @@ function getCategory() {
 
 // returns `name` (radical only), `meaning`, or `reading`
 function getType() {
-  const type = document.querySelector('#turbo-body > div.quiz > div.quiz-input > label > span.quiz-input__question-type');
+  const type = document.querySelector(Selectors.Type);
   if (type) {
     return type.textContent.trim().toLowerCase();
   }
@@ -31,7 +49,7 @@ export function getLanguage() {
 
 // returns flashcard "front"
 export function getPrompt() {
-  const el = document.querySelector('div.character-header__characters');
+  const el = document.querySelector(Selectors.Prompt);
   if (!el) {
     return null;
   }
@@ -55,7 +73,7 @@ export function getContext() {
 
 // looks up user synonym by (wanikani subject) id
 export function getUserSynonyms(id) {
-  const script = document.querySelector('#quiz-user-synonyms script');
+  const script = document.querySelector(Selectors.Synonyms);
   if (script) {
     const data = JSON.parse(script.textContent);
     if (data[id]) {
@@ -67,7 +85,7 @@ export function getUserSynonyms(id) {
 
 // flashcard "backs" for this review session
 export function getSubjects() {
-  const script = document.querySelector('#quiz-queue > script[data-quiz-queue-target="subjects"]');
+  const script = document.querySelector(Selectors.Subjects);
   if (!script) {
     return null;
   }
@@ -98,9 +116,9 @@ export function getSubjects() {
 }
 
 export function clickNext() {
-  const buttons = document.querySelectorAll('#turbo-body > div.quiz > div.quiz-input > div > div.quiz-input__input-container > form > button > i');
-  if (buttons.length > 0) {
-    buttons.item(0).click();
+  const button = document.querySelector(Selectors.Next);
+  if (button) {
+    button.click();
     return true;
   }
   return false;

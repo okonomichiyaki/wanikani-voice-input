@@ -71,4 +71,5 @@ function main() {
   state = "Ready";
 };
 
+wk.checkDom();
 main();
