@@ -16,10 +16,11 @@ export function createRecognition(lang, callback) {
     }
   };
   recognition.onerror = (event) => {
-    console.error('[wanikani-voice-input] error occurred in recognition:', event.error);
+    if (event.error !== 'no-speech') {
+      console.error('[wanikani-voice-input] error occurred in recognition:', event.error);
+    }
   };
   recognition.onend = () => {
-    console.log('[wanikani-voice-input] recognition onend, restarting');
     recognition.start();
   };
   return recognition;
