@@ -4,10 +4,23 @@ const Selectors = {
   Category: 'span.quiz-input__question-category',
   Type: 'span.quiz-input__question-type',
   Prompt: 'div.character-header__characters',
+  LessonMeaning: 'div.character-header__meaning',
   Synonyms: '#quiz-user-synonyms script',
   Subjects: '#quiz-queue > script[data-quiz-queue-target="subjects"]',
   Next: 'div.quiz-input__input-container button',
 };
+
+function getOtherMeanings() {
+  const sections = document.querySelectorAll('section.subject-section');
+  for (const section of sections) {
+    const title = section.querySelector('span.subject-section__title-text');
+    const content = section.querySelector('section.subject-section__content');
+    if (title && title.textContent === 'Other Meanings') {
+      return content.textContent;
+    }
+  }
+  return [];
+}
 
 export function checkDom() {
   for (const selector of Object.keys(Selectors)) {
