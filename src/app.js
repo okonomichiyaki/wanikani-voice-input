@@ -2,8 +2,6 @@ import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
 
-function handleAnswer(e) {
-}
 
 function contextHasChanged(prev) {
   const curr = wk.getContext();
@@ -22,18 +20,44 @@ function main() {
     state = newState;
   }
 
+  function next() {
+    wk.clickNext();
+    setState("Flipping");
+  }
+
+  const commands = {
+    'wrong': wk.markWrong,
+    'だめ': wk.markWrong,
+    'ダメ': wk.markWrong,
+    'next': next,
+    'つぎ': next,
+    '次': next,
+    'NEXT': next,
+  };
+
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(recognition, transcript, final) {
     if (state === "Ready") {
       answer = checkAnswer(recognition, transcript, final);
       if (answer) {
-        setState("Waiting");
-        wk.inputAnswer(answer);
+        if (final) {
+          setState("Flipping");
+          wk.submitAnswer(answer);
+          setTimeout(wk.clickNext, 100);
+        } else {
+          setState("Waiting");
+          wk.submitAnswer(answer);
+        }
+        return;
       }
     }
     if (state === "Waiting" && final) {
       setState("Flipping");
       setTimeout(wk.clickNext, 100);
+      return;
+    }
+    if (state === "Ready" && final && commands[transcript]) {
+      commands[transcript]();
     }
   });
 
@@ -65,6 +89,10 @@ function main() {
     } else {
       setTimeout(wk.clickInfo, 100);
     }
+  });
+
+  window.addEventListener("didAnswerQuestion", function(e) {
+    console.log(`[wanikani-voice-input] handleAnswer`, e);
   });
 
   recognition.start();

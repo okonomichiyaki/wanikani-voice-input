@@ -140,16 +140,19 @@ export function clickNext() {
 export function markWrong() {
   const lang = getLanguage();
   const incorrect = lang === "en-US" ? "aaa" : "あああ";
-  inputAnswer(incorrect);
+  submitAnswer(incorrect);
 }
 
 export function inputAnswer(input) {
   const userResponse = document.querySelector('#user-response');
   if (userResponse) {
     userResponse.value = input;
-    return clickNext();
   }
-  return false;
+}
+
+export function submitAnswer(input) {
+  inputAnswer(input);
+  return clickNext();
 }
 
 function isNotAlreadyOpen() {
