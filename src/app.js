@@ -33,6 +33,7 @@ function main() {
     'つぎ': next,
     '次': next,
     'NEXT': next,
+    'ねくすと': next,
   };
 
   const lang = wk.getLanguage();
