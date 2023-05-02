@@ -38,6 +38,7 @@ function main() {
 
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(recognition, transcript, final) {
+    console.log('[wanikani-voice-input]', wk.getContext());
     if (state === "Ready") {
       answer = checkAnswer(recognition, transcript, final);
       if (answer) {

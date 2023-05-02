@@ -9,6 +9,7 @@ export function createRecognition(lang, callback) {
   recognition.interimResults = true;
   recognition.lang = lang;
   recognition.onresult = (event) => {
+    console.log('[wanikani-voice-input] onresult', event);
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const transcript = event.results[i][0].transcript.trim();
       const final = event.results[i].isFinal;
