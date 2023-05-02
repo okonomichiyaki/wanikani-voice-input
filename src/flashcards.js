@@ -65,7 +65,7 @@ function getReadings(entries) {
 }
 
 function readingMatches(transcript, normalized, prompt, readings) {
-  return transcript === prompt || normalized === prompt || readings.some(r => r === normalized || r === homonyms[normalized]);
+  return transcript === prompt || normalized === prompt || readings.some(r => r === normalized || r === homonyms[normalized.toLowerCase()]);
 }
 
 function normalize(s) {
@@ -74,6 +74,24 @@ function normalize(s) {
 
 function meaningMatches(normalized, meanings) {
   return meanings.some(m => { return normalize(m) === normalize(normalized); });
+}
+
+function findRepeatingSubstring(s) {
+  let len = s.length;
+  for (let i = Math.floor(len / 2); i > 0; i--) {
+    if (len % i === 0) {
+      let match = true;
+      let sub = s.slice(0, i);
+      for (let j = i; j < len; j += i) {
+        if (s.slice(j, j + i) !== sub) {
+          match = false;
+          break;
+        }
+      }
+      if (match) return sub;
+    }
+  }
+  return null;
 }
 
 export function checkAnswer(recognition, raw, final) {
@@ -109,6 +127,11 @@ export function checkAnswer(recognition, raw, final) {
     } else {
       const entries = lookup(transcript);
       candidates = getReadings(entries);
+    }
+
+    const substr = findRepeatingSubstring(transcript);
+    if (substr) {
+      candidates.push(substr);
     }
   }
   if (candidates.length === 0) {
