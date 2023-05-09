@@ -116,25 +116,34 @@ export function checkAnswer(recognition, raw, final) {
     meanings.push(...synonyms);
   }
 
+  let transcript = normalize(raw);
   let candidates = [];
-  let transcript = raw;
   if (isJapanese(raw)) {
     transcript = toHiragana(raw);
-    transcript = normalize(transcript);
+    console.log(`[wanikani-voice-input] toHiragana candidate=${transcript} `);
+    candidates.push(transcript);
     if (transcript.endsWith('する')) {
       const entries = lookup(transcript.substring(0, transcript.length - 2));
-      candidates = getReadings(entries).map(r => r + 'する');
+      const rs = getReadings(entries).map(r => r + 'する');
+      for (let r of rs) {
+        console.log(`[wanikani-voice-input] する candidate=${r} `);
+      }
+      candidates.push(...rs);
     } else {
       const entries = lookup(transcript);
-      candidates = getReadings(entries);
+      const rs = getReadings(entries);
+      for (let r of rs) {
+        console.log(`[wanikani-voice-input] lookup candidate=${r} `);
+      }
+      candidates.push(...rs);
     }
 
     const substr = findRepeatingSubstring(transcript);
     if (substr) {
       candidates.push(substr);
+      console.log(`[wanikani-voice-input] repeating candidate=${substr} `);
     }
-  }
-  if (candidates.length === 0) {
+  } else {
     candidates.push(transcript);
   }
   for (const candidate of candidates) {
