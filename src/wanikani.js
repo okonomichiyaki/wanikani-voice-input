@@ -175,3 +175,18 @@ export function clickInfo() {
     }
   }
 }
+
+/* inspects event from `didAnswerQuestion` and returns true if question passed */
+export function didAnswerCorrectly(e) {
+  if (typeof e.detail !== 'object' || typeof e.detail.results !== 'object') {
+    console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
+    return false;
+  }
+  const results = e.detail.results;
+  const detail = e.detail;
+  if (typeof results.action !== 'string') {
+    console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
+    return false;
+  }
+  return results.action === 'pass';
+}

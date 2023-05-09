@@ -45,7 +45,6 @@ function main() {
         if (final) {
           setState("Flipping");
           wk.submitAnswer(answer);
-          setTimeout(wk.clickNext, 100);
         } else {
           setState("Waiting");
           wk.submitAnswer(answer);
@@ -82,8 +81,7 @@ function main() {
 
   // lightning mode and auto show info on wrong:
   window.addEventListener("didAnswerQuestion", function(e) {
-    const detail = e.detail;
-    if (detail.results.passed) {
+    if (wk.didAnswerCorrectly(e)) {
       if (state === "Ready") { // for manual input
         state = "Flipping";
         setTimeout(wk.clickNext, 100);
@@ -91,10 +89,6 @@ function main() {
     } else {
       setTimeout(wk.clickInfo, 100);
     }
-  });
-
-  window.addEventListener("didAnswerQuestion", function(e) {
-    console.log(`[wanikani-voice-input] handleAnswer`, e);
   });
 
   recognition.start();
