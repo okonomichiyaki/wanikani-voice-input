@@ -114,7 +114,9 @@ export function checkAnswer(recognition, raw, final) {
   const readings = [];
   const meanings = [];
   for (const item of items) {
-    readings.push(...item['readings'].map(r => r.reading));
+    if (item['readings']) {
+      readings.push(...item['readings'].map(r => r.reading));
+    }
     meanings.push(...item['meanings']);
     const synonyms = wk.getUserSynonyms(item['id']);
     meanings.push(...synonyms);
