@@ -27,6 +27,11 @@ function main() {
 
   const commands = {
     'wrong': wk.markWrong,
+    'incorrect': wk.markWrong,
+    '不正解': wk.markWrong,
+    'ふせいかい': wk.markWrong,
+    '間違い': wk.markWrong,
+    'まちがい': wk.markWrong,
     'だめ': wk.markWrong,
     'ダメ': wk.markWrong,
     'next': next,
