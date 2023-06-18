@@ -131,7 +131,7 @@ export function checkAnswer(recognition, raw, final) {
   }
 
   let transcript = normalize(raw);
-  let candidates = [];
+  let candidates = [raw, transcript];
   if (isJapanese(raw)) {
     transcript = toHiragana(raw);
     console.log(`[wanikani-voice-input] toHiragana candidate=${transcript} `);
@@ -157,8 +157,6 @@ export function checkAnswer(recognition, raw, final) {
       candidates.push(substr);
       console.log(`[wanikani-voice-input] repeating candidate=${substr} `);
     }
-  } else {
-    candidates.push(transcript);
   }
   for (const candidate of candidates) {
     const meaningMatch = meaningMatches(candidate, meanings);
