@@ -100,6 +100,7 @@ function main() {
         setState("Ready");
         previous = context;
         answer = null;
+        setTranscript('');
       }
     }
   }
