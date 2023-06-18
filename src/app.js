@@ -8,8 +8,30 @@ function contextHasChanged(prev) {
   return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
 }
 
+function createTranscriptContainer() {
+  const container = document.createElement('div');
+  container.id = "wanikani-voice-input-transcript-container";
+  container.style = "width: 100%; position: absolute; bottom: 0px; display: flex; align-items: center; justify-content: center;";
+
+  const transcript = document.createElement('p');
+  transcript.style = "background-color: lime";
+
+  const node = document.querySelector('span.quiz-input__question-category');
+  const fontSize = node ? window.getComputedStyle(node).fontSize : "22px";
+  transcript.style.fontSize = fontSize;
+
+  container.appendChild(transcript);
+  document.body.appendChild(container);
+}
+
+function setTranscript(text) {
+  const transcript = document.querySelector('div#wanikani-voice-input-transcript-container p');
+  transcript.textContent = text;
+}
+
 function main() {
   console.log('[wanikani-voice-input]');
+  createTranscriptContainer();
 
   let state = "Flipping";
   let previous = wk.getContext();
@@ -44,6 +66,7 @@ function main() {
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(recognition, transcript, final) {
     console.log('[wanikani-voice-input]', wk.getContext());
+    setTranscript(transcript);
     if (state === "Ready") {
       answer = checkAnswer(recognition, transcript, final);
       if (answer) {
