@@ -17,11 +17,7 @@ function createTranscriptContainer(position) {
   }
 
   const transcript = document.createElement('p');
-  transcript.style = "background-color: lime";
-
-  const node = document.querySelector('span.quiz-input__question-category');
-  const fontSize = node ? window.getComputedStyle(node).fontSize : "22px";
-  transcript.style.fontSize = fontSize;
+  transcript.style = "background-color: gold; font-size: 5vh;";
 
   container.appendChild(transcript);
   document.body.appendChild(container);
