@@ -8,10 +8,13 @@ function contextHasChanged(prev) {
   return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
 }
 
-function createTranscriptContainer() {
+function createTranscriptContainer(position) {
   const container = document.createElement('div');
   container.id = "wanikani-voice-input-transcript-container";
-  container.style = "width: 100%; position: absolute; bottom: 0px; display: flex; align-items: center; justify-content: center;";
+  container.style = "width: 100%; position: absolute; display: flex; align-items: center; justify-content: center;";
+  if (position === "top" || position === "bottom") {
+    container.style = container.style + ` ${position}: 0px`;
+  }
 
   const transcript = document.createElement('p');
   transcript.style = "background-color: lime";
@@ -31,7 +34,7 @@ function setTranscript(text) {
 
 function main() {
   console.log('[wanikani-voice-input]');
-  createTranscriptContainer();
+  createTranscriptContainer("top");
 
   let state = "Flipping";
   let previous = wk.getContext();
@@ -100,7 +103,7 @@ function main() {
         setState("Ready");
         previous = context;
         answer = null;
-        setTranscript('');
+        setTranscript("");
       }
     }
   }
