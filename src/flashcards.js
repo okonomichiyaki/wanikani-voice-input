@@ -164,10 +164,10 @@ export function checkAnswer(recognition, raw, final) {
 
     console.log("[wanikani-voice-input]", { prompt, transcript, final, candidate, meaningMatch, readingMatch, meanings, readings });
 
-    if (readingMatch) {
+    if (readingMatch && readings.length > 0) {
       return readings[0];
     }
-    if (meaningMatch) {
+    if (meaningMatch && meanings.length > 0) {
       return meanings[0];
     }
   }

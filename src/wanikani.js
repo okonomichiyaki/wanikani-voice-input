@@ -66,9 +66,9 @@ export function getPrompt() {
   if (!el) {
     return null;
   }
-  let prompt = el.textContent;
-  if (prompt === '' && el.childNodes.length > 0 && el.childNodes[0].alt) {
-    prompt = el.childNodes[0].alt.toLowerCase();
+  let prompt = el.textContent; // kanji, vocab
+  if (prompt === '' && el.childNodes.length > 0 && el.childNodes[0].getAttribute('aria-label')) {
+    prompt = el.childNodes[0].getAttribute('aria-label').toLowerCase(); // radical
   }
   if (prompt === '') {
     return null;
