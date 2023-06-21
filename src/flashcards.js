@@ -2,6 +2,7 @@ import * as wk from './wanikani.js';
 import { clickSelector } from './util.js';
 import { raw } from './dict.js';
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
+import levenshtein from 'js-levenshtein';
 
 function lookup(s) {
   const result = raw[s];
@@ -85,7 +86,15 @@ function normalize(s) {
 }
 
 function meaningMatches(normalized, meanings) {
-  return meanings.some(m => { return normalize(m) === normalize(normalized); });
+  for (const m of meanings) {
+    if (normalize(m) === normalize(normalized)) {
+      return true;
+    }
+    if (levenshtein(normalize(m), normalize(normalized)) < 2) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function findRepeatingSubstring(s) {
