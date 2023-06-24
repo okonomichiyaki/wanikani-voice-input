@@ -1,7 +1,7 @@
 import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
-
+import { initializeSettings } from './settings.js';
 
 function contextHasChanged(prev) {
   const curr = wk.getContext();
@@ -126,7 +126,7 @@ function main() {
   state = "Ready";
 };
 
-function setup() {
+function setupMicButton() {
   const menu = document.querySelector('div.character-header__menu-navigation');
   const item = document.createElement('div');
   item.classList.add('character-header__menu-navigation-link');
@@ -160,4 +160,19 @@ function setup() {
 
 wk.checkDom();
 main();
-setup();
+
+function onUpdate() {
+  console.log('[wanikani-voice-input] onUpdate');
+//  console.log('New maximum is ' + wkof.settings.settings_demo_01.max_apprentice);
+}
+
+function onStart() {
+  console.log('[wanikani-voice-input] onStart');
+}
+
+if (window.wkof) {
+  const wkof = window.wkof;
+  initializeSettings(wkof, onStart, onUpdate);
+} else {
+  console.log('[wanikani-voice-input] wkof not found?');
+}
