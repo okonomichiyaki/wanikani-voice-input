@@ -11,13 +11,16 @@ function contextHasChanged(prev) {
 function createTranscriptContainer(position) {
   const container = document.createElement('div');
   container.id = "wanikani-voice-input-transcript-container";
-  container.style = "width: 100%; position: absolute; display: flex; align-items: center; justify-content: center;";
+  let style = "width: 100%; position: absolute; display: flex; align-items: center; justify-content: center;";
   if (position === "top" || position === "bottom") {
-    container.style = container.style + ` ${position}: 0px`;
+    style = style + ` ${position}: 0px`;
+  } else if (position === "center") {
+    style = style + ` top: 45vh`;
   }
+  container.style = style;
 
   const transcript = document.createElement('p');
-  transcript.style = "background-color: gold; font-size: 5vh;";
+  transcript.style = "color: black; background-color: gold; font-size: 5vh;";
 
   container.appendChild(transcript);
   document.body.appendChild(container);
