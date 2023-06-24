@@ -2,33 +2,11 @@ import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
 import { initializeSettings } from './settings.js';
+import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 
 function contextHasChanged(prev) {
   const curr = wk.getContext();
   return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
-}
-
-function createTranscriptContainer(position) {
-  const container = document.createElement('div');
-  container.id = "wanikani-voice-input-transcript-container";
-  let style = "width: 100%; position: absolute; display: flex; align-items: center; justify-content: center;";
-  if (position === "top" || position === "bottom") {
-    style = style + ` ${position}: 0px`;
-  } else if (position === "center") {
-    style = style + ` top: 45vh`;
-  }
-  container.style = style;
-
-  const transcript = document.createElement('p');
-  transcript.style = "color: black; background-color: gold; font-size: 5vh;";
-
-  container.appendChild(transcript);
-  document.body.appendChild(container);
-}
-
-function setTranscript(text) {
-  const transcript = document.querySelector('div#wanikani-voice-input-transcript-container p');
-  transcript.textContent = text;
 }
 
 function main() {
@@ -125,41 +103,6 @@ function main() {
   recognition.start();
   state = "Ready";
 };
-
-function setupMicButton() {
-  const menu = document.querySelector('div.character-header__menu-navigation');
-  const item = document.createElement('div');
-  item.classList.add('character-header__menu-navigation-link');
-  item.style = 'margin-left: 10px;';
-  const link = document.createElement('a');
-  link.title = 'Toggle voice input';
-  link.classList.add('summary-button');
-
-  let state = true;
-  link.onclick = function(e) {
-    console.log(`[wanikani-voice-input] >> mic click`);
-    if (state) {
-      icon.classList.remove('fa-solid');
-      icon.classList.add('fa-light');
-    } else {
-      icon.classList.remove('fa-solid');
-      icon.classList.add('fa-light');
-    }
-    state = !state;
-  };
-
-  const icon = document.createElement('i');
-  icon.classList.add('wk-icon');
-  icon.classList.add('fa-solid');
-  icon.classList.add('fa-microphone');
-
-  link.appendChild(icon);
-  item.appendChild(link);
-  menu.appendChild(item);
-}
-
-wk.checkDom();
-main();
 
 function onUpdate() {
   console.log('[wanikani-voice-input] onUpdate');
