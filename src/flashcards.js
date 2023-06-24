@@ -3,6 +3,7 @@ import { clickSelector } from './util.js';
 import { raw } from './dict.js';
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
 import levenshtein from 'js-levenshtein';
+import { findRepeatingSubstring } from './repeating.js';
 
 function lookup(s) {
   const result = raw[s];
@@ -95,24 +96,6 @@ function meaningMatches(normalized, meanings) {
     }
   }
   return false;
-}
-
-function findRepeatingSubstring(s) {
-  let len = s.length;
-  for (let i = Math.floor(len / 2); i > 0; i--) {
-    if (len % i === 0) {
-      let match = true;
-      let sub = s.slice(0, i);
-      for (let j = i; j < len; j += i) {
-        if (s.slice(j, j + i) !== sub) {
-          match = false;
-          break;
-        }
-      }
-      if (match) return sub;
-    }
-  }
-  return null;
 }
 
 export function checkAnswer(recognition, raw, final) {

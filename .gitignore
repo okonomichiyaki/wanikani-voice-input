@@ -2,3 +2,5 @@ node_modules
 .parcel-cache
 data
 dist
+yarn-debug.log*
+yarn-error.log*
