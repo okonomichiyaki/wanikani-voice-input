@@ -31,8 +31,7 @@ function collectWords(filename, dictionary) {
       id: word['id'],
       type: 'word',
       kanji: word['kanji'].map(k => k['text']),
-      kana: kana,
-      sense: word['sense'].flatMap(s => s['gloss'].map(g => g['text']))
+      kana: kana
     };
     for (const k of word['kanji']) {
       const text = k['text'];
