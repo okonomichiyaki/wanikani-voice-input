@@ -1,4 +1,3 @@
-
 export function initializeSettings(wkof, onStart, onUpdate) {
   wkof.include('Menu,Settings');
   wkof.ready('Menu,Settings')
@@ -25,12 +24,11 @@ export function initializeSettings(wkof, onStart, onUpdate) {
       title: 'Voice Input',
       on_save: onUpdate,
       content: {
-        // TODO
-        max_apprentice: {
-          type: 'number',
-          label: 'Maximum Apprentice Items',
-          default: 100,
-          hover_tip: 'The maximum number of apprentice items to allow.',
+        lightning: {
+          type: 'checkbox',
+          label: 'Lightning Mode',
+          default: true,
+          hover_tip: 'Automatically advanced to the next flashcard',
         },
       }
     };

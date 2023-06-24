@@ -41,6 +41,7 @@ function main() {
     '次': next,
     'NEXT': next,
     'ねくすと': next,
+    'ネクスト': next,
   };
 
   const lang = wk.getLanguage();
@@ -62,7 +63,9 @@ function main() {
     }
     if (state === "Waiting" && final) {
       setState("Flipping");
-      setTimeout(wk.clickNext, 100);
+      if (isLightningOn()) {
+        setTimeout(wk.clickNext, 100);
+      }
       return;
     }
     if (state === "Ready" && final && commands[transcript]) {
@@ -74,14 +77,12 @@ function main() {
   function mutationCallback(mutations, observer) {
     const lang = wk.getLanguage();
     setLanguage(recognition, lang);
-    if (state === "Flipping") {
-      const context = contextHasChanged(previous);
-      if (context) {
-        setState("Ready");
-        previous = context;
-        answer = null;
-        setTranscript("");
-      }
+    const context = contextHasChanged(previous);
+    if (state === "Flipping" && context) {
+      setState("Ready");
+      previous = context;
+      answer = null;
+      setTranscript("");
     }
   }
   const config = { attributes: true, childList: true, subtree: true };
@@ -93,10 +94,14 @@ function main() {
     if (wk.didAnswerCorrectly(e)) {
       if (state === "Ready") { // for manual input
         state = "Flipping";
-        setTimeout(wk.clickNext, 100);
+        if (isLightningOn()) {
+          setTimeout(wk.clickNext, 100);
+        }
       }
     } else {
-      setTimeout(wk.clickInfo, 100);
+      if (isLightningOn()) {
+        setTimeout(wk.clickInfo, 100);
+      }
     }
   });
 
@@ -105,12 +110,15 @@ function main() {
 };
 
 function onUpdate() {
-  console.log('[wanikani-voice-input] onUpdate');
-//  console.log('New maximum is ' + wkof.settings.settings_demo_01.max_apprentice);
+  const lightning = window.wkof.settings['wanikani-voice-input'].lightning;
+  console.log('[wanikani-voice-input] onUpdate', lightning);
 }
 
 function onStart() {
   console.log('[wanikani-voice-input] onStart');
+  wk.checkDom();
+  main();
+
 }
 
 if (window.wkof) {
@@ -118,4 +126,12 @@ if (window.wkof) {
   initializeSettings(wkof, onStart, onUpdate);
 } else {
   console.log('[wanikani-voice-input] wkof not found?');
+  onStart();
+}
+
+function isLightningOn() {
+  if (window.wkof && window.wkof.settings['wanikani-voice-input']) {
+    return window.wkof.settings['wanikani-voice-input'].lightning;
+  }
+  return true;
 }
