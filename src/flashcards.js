@@ -1,12 +1,11 @@
 import * as wk from './wanikani.js';
 import { clickSelector } from './util.js';
-import { raw } from './dict.js';
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
 import levenshtein from 'js-levenshtein';
 import { findRepeatingSubstring } from './repeating.js';
 
-function lookup(s) {
-  const result = raw[s];
+function lookup(dictionary, s) {
+  const result = dictionary[s];
   if (result) {
     return result;
   }
@@ -138,7 +137,7 @@ function success(candidate, answer) {
   };
 }
 
-export function checkAnswer(raw) {
+export function checkAnswer(dictionary, raw) {
   const subjects = wk.getSubjects();
   const prompt = wk.getPrompt();
   if (!prompt) {
@@ -170,13 +169,13 @@ export function checkAnswer(raw) {
     }
 
     if (hiragana.endsWith('する')) {
-      const entries = lookup(hiragana.substring(0, hiragana.length - 2));
+      const entries = lookup(dictionary, hiragana.substring(0, hiragana.length - 2));
       const rs = getReadings(entries).map(r => r + 'する');
       for (let r of rs) {
         candidates.push({type: "する", data: r});
       }
     } else {
-      const entries = lookup(hiragana);
+      const entries = lookup(dictionary, hiragana);
       const rs = getReadings(entries);
       for (let r of rs) {
         candidates.push({type: "dictionary", data: r});

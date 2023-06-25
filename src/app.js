@@ -3,6 +3,9 @@ import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
 import { initializeSettings } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
+import { loadDictionary } from './dict.js';
+
+const dictionary = loadDictionary();
 
 function handleSpeechRecognition(state, commands, raw, final) {
   let newState = state;
@@ -12,7 +15,7 @@ function handleSpeechRecognition(state, commands, raw, final) {
   let transcript = raw;
 
   if (state === "Ready") {
-    let result = checkAnswer(raw);
+    let result = checkAnswer(dictionary, raw);
     console.log('[wanikani-voice-input]', raw, result);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
@@ -135,21 +138,14 @@ function main() {
   state = "Ready";
 };
 
-function onUpdate() {
-  const lightning = window.wkof.settings['wanikani-voice-input'].lightning;
-  console.log('[wanikani-voice-input] onUpdate', lightning);
-}
-
-function onStart() {
-  console.log('[wanikani-voice-input] onStart');
+async function onStart() {
   wk.checkDom();
   main();
-
 }
 
 if (window.wkof) {
   const wkof = window.wkof;
-  initializeSettings(wkof, onStart, onUpdate);
+  initializeSettings(wkof, onStart);
 } else {
   console.log('[wanikani-voice-input] wkof not found?');
   onStart();
@@ -161,3 +157,4 @@ function isLightningOn() {
   }
   return true;
 }
+

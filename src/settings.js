@@ -1,4 +1,4 @@
-export function initializeSettings(wkof, onStart, onUpdate) {
+export function initializeSettings(wkof, onStart) {
   wkof.include('Menu,Settings');
   wkof.ready('Menu,Settings')
     .then(installMenu)
@@ -22,7 +22,6 @@ export function initializeSettings(wkof, onStart, onUpdate) {
     var config = {
       script_id: 'wanikani-voice-input',
       title: 'Voice Input',
-      on_save: onUpdate,
       content: {
         lightning: {
           type: 'checkbox',
