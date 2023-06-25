@@ -47,7 +47,7 @@ function contextHasChanged(prev) {
 
 function main() {
   console.log('[wanikani-voice-input]');
-  createTranscriptContainer("top");
+  createTranscriptContainer();
 
   let state = "Flipping";
   let previous = wk.getContext();
@@ -66,6 +66,7 @@ function main() {
   const commands = {
     'wrong': wk.markWrong,
     'incorrect': wk.markWrong,
+    'mistake': wk.markWrong,
     '不正解': wk.markWrong,
     'ふせいかい': wk.markWrong,
     '間違い': wk.markWrong,
