@@ -1,7 +1,3 @@
-
-const JMDICT_URL = "https://raw.githubusercontent.com/okonomichiyaki/wanikani-voice-input/main/data/jmdict.json";
-const KANJIDIC2_URL = "https://raw.githubusercontent.com/okonomichiyaki/wanikani-voice-input/main/data/kanjidic2.json";
-
 function addEntry(dictionary, key, entry) {
   if (!dictionary[key]) {
     dictionary[key] = [];
@@ -9,14 +5,9 @@ function addEntry(dictionary, key, entry) {
   dictionary[key].push(entry);
 }
 
-async function loadJson(url) {
-  const response = await fetch(url);
-  return response.json();
-}
-
-export async function loadDictionary() {
-  let words = await loadJson(JMDICT_URL);
-  let kanji = await loadJson(KANJIDIC2_URL);
+export function loadDictionary() {
+  let words = JSON.parse(GM_getResourceText("jmdict"));
+  let kanji = JSON.parse(GM_getResourceText("kanjidic2"));
   let dictionary = {};
   for (const [k, v] of Object.entries(words)) {
     addEntry(dictionary, k, v);

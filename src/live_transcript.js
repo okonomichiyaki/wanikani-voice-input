@@ -1,8 +1,5 @@
-function getContainerStyle() {
-  let position = 'top';
-  if (window.wkof) {
-    position = window.wkof.settings['wanikani-voice-input'].transcript_position;
-  }
+function getContainerStyle(settings) {
+  let position = settings.transcript_position;
   let style = "width: 100%; position: absolute; display: flex; align-items: center; justify-content: center; pointer-events: none;";
   if (position === "top" || position === "bottom") {
     style = style + ` ${position}: 0px`;
@@ -12,36 +9,32 @@ function getContainerStyle() {
   return style;
 }
 
-function getTranscriptStyle() {
-  let fgcolor = 'black';
-  let bgcolor = 'gold';
-  if (window.wkof) {
-    fgcolor = window.wkof.settings['wanikani-voice-input'].transcript_foreground;
-    bgcolor = window.wkof.settings['wanikani-voice-input'].transcript_background;
-  }
+function getTranscriptStyle(settings) {
+  let fgcolor = settings.transcript_foreground;
+  let bgcolor = settings.transcript_background;
   return `color: ${fgcolor}; background-color: ${bgcolor}; font-size: 5vh;`;
 }
 
-export function createTranscriptContainer() {
+export function createTranscriptContainer(settings) {
   const container = document.createElement('div');
   container.id = "wanikani-voice-input-transcript-container";
-  container.style = getContainerStyle();
+  container.style = getContainerStyle(settings);
 
   const transcript = document.createElement('p');
-  transcript.style = getTranscriptStyle();
+  transcript.style = getTranscriptStyle(settings);
 
   container.appendChild(transcript);
   document.body.appendChild(container);
 }
 
-export function setTranscript(text) {
-  if (window.wkof && !window.wkof.settings['wanikani-voice-input'].transcript) {
+export function setTranscript(settings, text) {
+  if (!settings.transcript) {
     return;
   }
   const container = document.querySelector('div#wanikani-voice-input-transcript-container');
-  container.style = getContainerStyle();
+  container.style = getContainerStyle(settings);
   const transcript = document.querySelector('div#wanikani-voice-input-transcript-container p');
-  transcript.style = getTranscriptStyle();
+  transcript.style = getTranscriptStyle(settings);
   const old = transcript.textContent;
   if (!old.startsWith(text) // HACK for "fast mode" waiting for final
       || text === "") {

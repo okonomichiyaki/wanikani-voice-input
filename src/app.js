@@ -1,13 +1,17 @@
 import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
-import { initializeSettings } from './settings.js';
+import { initializeSettings, getSettings, isLightningOn } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
-const dictionary = loadDictionary();
+function onStart() {
+  wk.checkDom();
+  const dictionary = loadDictionary();
+  main(dictionary);
+}
 
-function handleSpeechRecognition(state, commands, raw, final) {
+function handleSpeechRecognition(dictionary, state, commands, raw, final) {
   let newState = state;
   let answer = null;
   let command = null;
@@ -48,9 +52,8 @@ function contextHasChanged(prev) {
   return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
 }
 
-function main() {
-  console.log('[wanikani-voice-input]');
-  createTranscriptContainer();
+function main(dictionary) {
+  createTranscriptContainer(getSettings());
 
   let state = "Flipping";
   let previous = wk.getContext();
@@ -87,8 +90,8 @@ function main() {
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
     console.log('[wanikani-voice-input]', wk.getContext());
-    let outcome = handleSpeechRecognition(state, commands, raw, final);
-    setTranscript(outcome.transcript);
+    let outcome = handleSpeechRecognition(dictionary, state, commands, raw, final);
+    setTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
     }
@@ -111,7 +114,7 @@ function main() {
     if (state === "Flipping" && context) {
       setState("Ready");
       previous = context;
-      setTranscript("");
+      setTranscript(getSettings(), '');
     }
   }
   const config = { attributes: true, childList: true, subtree: true };
@@ -138,23 +141,10 @@ function main() {
   state = "Ready";
 };
 
-async function onStart() {
-  wk.checkDom();
-  main();
-}
 
-if (window.wkof) {
-  const wkof = window.wkof;
-  initializeSettings(wkof, onStart);
+if (unsafeWindow.wkof) {
+  initializeSettings(unsafeWindow.wkof, onStart);
 } else {
   console.log('[wanikani-voice-input] wkof not found?');
   onStart();
 }
-
-function isLightningOn() {
-  if (window.wkof && window.wkof.settings['wanikani-voice-input']) {
-    return window.wkof.settings['wanikani-voice-input'].lightning;
-  }
-  return true;
-}
-

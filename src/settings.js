@@ -1,3 +1,20 @@
+export function isLightningOn() {
+  return getSettings().lightning;
+}
+
+export function getSettings() {
+  if (unsafeWindow.wkof) {
+    return unsafeWindow.wkof.settings['wanikani-voice-input'];
+  }
+  return {
+    lightning: true,
+    transcript: true,
+    transcript_background: "#ffd700", // gold
+    transcript_foreground: "#000000", // black
+    transcript_position: "top"
+  };
+}
+
 export function initializeSettings(wkof, onStart) {
   wkof.include('Menu,Settings');
   wkof.ready('Menu,Settings')
