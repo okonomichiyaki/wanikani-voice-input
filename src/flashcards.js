@@ -138,7 +138,7 @@ function success(candidate, answer) {
   };
 }
 
-export function checkAnswer(recognition, raw, final) {
+export function checkAnswer(raw) {
   const subjects = wk.getSubjects();
   const prompt = wk.getPrompt();
   if (!prompt) {
@@ -205,5 +205,7 @@ export function checkAnswer(recognition, raw, final) {
   }
 
   result.candidates = candidates;
+  result.meanings = meanings;
+  result.readings = readings;
   return result;
 }

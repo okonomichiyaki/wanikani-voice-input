@@ -4,7 +4,7 @@ import * as wk from './wanikani.js';
 import { initializeSettings } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 
-function handleSpeechRecognition(state, commands, recognition, raw, final) {
+function handleSpeechRecognition(state, commands, raw, final) {
   let newState = state;
   let answer = null;
   let command = null;
@@ -12,8 +12,8 @@ function handleSpeechRecognition(state, commands, recognition, raw, final) {
   let transcript = raw;
 
   if (state === "Ready") {
-    let result = checkAnswer(recognition, raw, final);
-    console.log('[wanikani-voice-input]', result);
+    let result = checkAnswer(raw);
+    console.log('[wanikani-voice-input]', raw, result);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
     }
@@ -82,9 +82,9 @@ function main() {
   };
 
   const lang = wk.getLanguage();
-  const recognition = createRecognition(lang, function(recognition, raw, final) {
+  const recognition = createRecognition(lang, function(raw, final) {
     console.log('[wanikani-voice-input]', wk.getContext());
-    let outcome = handleSpeechRecognition(state, commands, recognition, raw, final);
+    let outcome = handleSpeechRecognition(state, commands, raw, final);
     setTranscript(outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);

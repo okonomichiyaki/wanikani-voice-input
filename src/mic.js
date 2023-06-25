@@ -9,7 +9,6 @@ function setupMicButton() {
 
   let state = true;
   link.onclick = function(e) {
-    console.log(`[wanikani-voice-input] >> mic click`);
     if (state) {
       icon.classList.remove('fa-solid');
       icon.classList.add('fa-light');

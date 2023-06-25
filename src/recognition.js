@@ -9,11 +9,10 @@ export function createRecognition(lang, callback) {
   recognition.interimResults = true;
   recognition.lang = lang;
   recognition.onresult = (event) => {
-    console.log('[wanikani-voice-input] onresult', event);
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const transcript = event.results[i][0].transcript.trim();
       const final = event.results[i].isFinal;
-      callback(recognition, transcript, final);
+      callback(transcript, final);
     }
   };
   recognition.onerror = (event) => {
@@ -30,7 +29,6 @@ export function createRecognition(lang, callback) {
 
 export function setLanguage(recognition, newLanguage) {
   if (recognition.lang != newLanguage) {
-    console.log('[wanikani-voice-input] setting language', newLanguage);
     recognition.stop();
     recognition.lang = newLanguage;
   }
