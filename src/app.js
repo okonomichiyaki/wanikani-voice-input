@@ -4,6 +4,42 @@ import * as wk from './wanikani.js';
 import { initializeSettings } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 
+function handleSpeechRecognition(state, commands, recognition, raw, final) {
+  let newState = state;
+  let answer = null;
+  let command = null;
+  let lightning = false;
+  let transcript = raw;
+
+  if (state === "Ready") {
+    let result = checkAnswer(recognition, raw, final);
+    console.log('[wanikani-voice-input]', result);
+    if (result.candidate && transcript !== result.candidate.data) {
+      transcript = transcript + ` (${result.candidate.data})`;
+    }
+    if (result.success) {
+      if (final) {
+        newState = "Flipping";
+        answer = result.answer;
+      } else {
+        newState = "Waiting";
+        answer = result.answer;
+      }
+    } else if (result.error) {
+      transcript = "!! " + result.message + " !!";
+    }
+  }
+  if (state === "Waiting" && final) {
+    newState = "Flipping";
+    lightning = isLightningOn();
+  }
+  if (state === "Ready" && final && commands[raw]) {
+    command = commands[raw];
+  }
+
+  return { newState, transcript, answer, command, lightning };
+}
+
 function contextHasChanged(prev) {
   const curr = wk.getContext();
   return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
@@ -15,7 +51,7 @@ function main() {
 
   let state = "Flipping";
   let previous = wk.getContext();
-  let answer = null;
+  let result = null;
 
   function setState(newState) {
     console.log(`[wanikani-voice-input] >> ${newState}`);
@@ -45,31 +81,21 @@ function main() {
   };
 
   const lang = wk.getLanguage();
-  const recognition = createRecognition(lang, function(recognition, transcript, final) {
+  const recognition = createRecognition(lang, function(recognition, raw, final) {
     console.log('[wanikani-voice-input]', wk.getContext());
-    setTranscript(transcript);
-    if (state === "Ready") {
-      answer = checkAnswer(recognition, transcript, final);
-      if (answer) {
-        if (final) {
-          setState("Flipping");
-          wk.submitAnswer(answer);
-        } else {
-          setState("Waiting");
-          wk.submitAnswer(answer);
-        }
-        return;
-      }
+    let outcome = handleSpeechRecognition(state, commands, recognition, raw, final);
+    setTranscript(outcome.transcript);
+    if (state !== outcome.newState) {
+      setState(outcome.newState);
     }
-    if (state === "Waiting" && final) {
-      setState("Flipping");
-      if (isLightningOn()) {
-        setTimeout(wk.clickNext, 100);
-      }
-      return;
+    if (outcome.answer) {
+      wk.submitAnswer(outcome.answer);
     }
-    if (state === "Ready" && final && commands[transcript]) {
-      commands[transcript]();
+    if (outcome.lightning) {
+      setTimeout(wk.clickNext, 100);
+    }
+    if (outcome.command) {
+      outcome.command();
     }
   });
 
@@ -81,7 +107,6 @@ function main() {
     if (state === "Flipping" && context) {
       setState("Ready");
       previous = context;
-      answer = null;
       setTranscript("");
     }
   }

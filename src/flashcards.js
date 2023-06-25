@@ -14,6 +14,7 @@ function lookup(s) {
 }
 
 const homonyms = {
+  'b': 'び',
   'ezone': 'いぞん',
   'gt': 'じき',
   'g': 'じ',
@@ -78,37 +79,74 @@ function getReadings(entries) {
   });
 }
 
-function readingMatches(transcript, normalized, prompt, readings) {
-  return transcript === prompt || normalized === prompt || readings.some(r => r === normalized || r === homonyms[normalized.toLowerCase()]);
+function literalMatches(candidate, prompt) {
+  const data = candidate.data;
+  if (normalize(data) === normalize(prompt)) {
+    return prompt;
+  }
+  return null;
+}
+
+function readingMatches(candidate, readings) {
+  const data = candidate.data;
+  for (const r of readings) {
+    if (r === data || r === homonyms[data.toLowerCase()]) {
+      return r;
+    }
+  }
+  return null;
 }
 
 function normalize(s) {
+  // TODO remove punctuation
   return s.toLowerCase().replaceAll(' ', '');
 }
 
-function meaningMatches(normalized, meanings) {
+function meaningMatches(candidate, meanings) {
+  const data = candidate.data;
   for (const m of meanings) {
-    if (normalize(m) === normalize(normalized)) {
-      return true;
+    if (normalize(m) === normalize(data)) {
+      return m;
     }
-    if (levenshtein(normalize(m), normalize(normalized)) < 2) {
-      return true;
+    if (levenshtein(normalize(m), normalize(data)) < 2) {
+      return m;
     }
   }
-  return false;
+  return null;
+}
+
+function error(message) {
+  return {
+    error: true,
+    message: message
+  };
+}
+
+function incorrect() {
+  return {
+    error: false,
+    message: "incorrect answer",
+  };
+}
+
+function success(candidate, answer) {
+  return {
+    success: true,
+    message: "correct answer",
+    candidate: candidate,
+    answer: answer
+  };
 }
 
 export function checkAnswer(recognition, raw, final) {
   const subjects = wk.getSubjects();
   const prompt = wk.getPrompt();
   if (!prompt) {
-    console.log("[wanikani-voice-input] failed to find prompts");
-    return undefined;
+    return error("failed to find flashcard prompt");
   }
   const items = subjects[prompt];
   if (!items || items.length < 1) {
-    console.log(`[wanikani-voice-input] failed to find item: ${prompt}`);
-    return undefined;
+    return error(`failed to find item: ${prompt}`);
   }
 
   const readings = [];
@@ -122,47 +160,50 @@ export function checkAnswer(recognition, raw, final) {
     meanings.push(...synonyms);
   }
 
-  let transcript = normalize(raw);
-  let candidates = [raw, transcript];
+  let candidates = [];
+  candidates.push({type: "raw", data: raw});
+
   if (isJapanese(raw)) {
-    transcript = toHiragana(raw);
-    console.log(`[wanikani-voice-input] toHiragana candidate=${transcript} `);
-    candidates.push(transcript);
-    if (transcript.endsWith('する')) {
-      const entries = lookup(transcript.substring(0, transcript.length - 2));
+    let hiragana = toHiragana(raw);
+    if (hiragana !== raw) {
+      candidates.push({"type": "hiragana", data: hiragana});
+    }
+
+    if (hiragana.endsWith('する')) {
+      const entries = lookup(hiragana.substring(0, hiragana.length - 2));
       const rs = getReadings(entries).map(r => r + 'する');
       for (let r of rs) {
-        console.log(`[wanikani-voice-input] する candidate=${r} `);
+        candidates.push({type: "する", data: r});
       }
-      candidates.push(...rs);
     } else {
-      const entries = lookup(transcript);
+      const entries = lookup(hiragana);
       const rs = getReadings(entries);
       for (let r of rs) {
-        console.log(`[wanikani-voice-input] lookup candidate=${r} `);
+        candidates.push({type: "dictionary", data: r});
       }
-      candidates.push(...rs);
     }
 
-    const substr = findRepeatingSubstring(transcript);
+    const substr = findRepeatingSubstring(hiragana);
     if (substr) {
-      candidates.push(substr);
-      console.log(`[wanikani-voice-input] repeating candidate=${substr} `);
+      candidates.push({type: "repeating", data: substr});
     }
   }
+
+  let result = incorrect();
   for (const candidate of candidates) {
     const meaningMatch = meaningMatches(candidate, meanings);
-    const readingMatch = readingMatches(transcript, candidate, prompt, readings);
+    const readingMatch = readingMatches(candidate, readings);
+    const literal = literalMatches(candidate, prompt);
 
-    console.log("[wanikani-voice-input]", { prompt, transcript, final, candidate, meaningMatch, readingMatch, meanings, readings });
-
-    if (readingMatch && readings.length > 0) {
-      return readings[0];
-    }
-    if (meaningMatch && meanings.length > 0) {
-      return meanings[0];
+    if (readingMatch) {
+      result = success(candidate, readingMatch);
+    } else if (meaningMatch) {
+      result = success(candidate, meaningMatch);
+    } else if (literal && readings.length > 0) {
+      result = success(candidate, readings[0]); // TODO indicate literal match?
     }
   }
 
-  return undefined;
+  result.candidates = candidates;
+  return result;
 }

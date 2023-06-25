@@ -18,5 +18,9 @@ export function createTranscriptContainer(position) {
 
 export function setTranscript(text) {
   const transcript = document.querySelector('div#wanikani-voice-input-transcript-container p');
-  transcript.textContent = text;
+  const old = transcript.textContent;
+  if (!old.startsWith(text) // HACK for "fast mode" waiting for final
+      || text === "") {
+    transcript.textContent = text;
+  }
 }
