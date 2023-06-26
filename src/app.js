@@ -40,7 +40,7 @@ function handleSpeechRecognition(dictionary, state, commands, raw, final) {
     newState = "Flipping";
     lightning = isLightningOn();
   }
-  if (state === "Ready" && final && commands[raw]) {
+  if ((state === "Ready" || state === "Flipping") && final && commands[raw]) {
     command = commands[raw];
   }
 
