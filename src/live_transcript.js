@@ -12,7 +12,7 @@ function getContainerStyle(settings) {
 function getTranscriptStyle(settings) {
   let fgcolor = settings.transcript_foreground;
   let bgcolor = settings.transcript_background;
-  return `color: ${fgcolor}; background-color: ${bgcolor}; font-size: 5vh;`;
+  return `color: ${fgcolor}; background-color: ${bgcolor}; font-size: 5vh; pointer-events: auto;`;
 }
 
 export function createTranscriptContainer(settings) {
