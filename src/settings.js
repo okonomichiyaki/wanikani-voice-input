@@ -1,3 +1,6 @@
+const gold = '#ffd700';
+const black = '#000000';
+
 export function isLightningOn() {
   return getSettings().lightning;
 }
@@ -7,10 +10,10 @@ export function getSettings() {
     return unsafeWindow.wkof.settings['wanikani-voice-input'];
   }
   return {
-    lightning: true,
+    lightning: false,
     transcript: true,
-    transcript_background: "#ffd700", // gold
-    transcript_foreground: "#000000", // black
+    transcript_background: gold,
+    transcript_foreground: black,
     transcript_position: "top"
   };
 }
@@ -43,7 +46,7 @@ export function initializeSettings(wkof, onStart) {
         lightning: {
           type: 'checkbox',
           label: 'Lightning mode',
-          default: true,
+          default: false,
           hover_tip: 'If enabled, automatically advance to the next flashcard on correct answers. If enabled, please disable lightning mode from any other scripts.',
         },
         transcript: {
@@ -56,13 +59,13 @@ export function initializeSettings(wkof, onStart) {
           type: 'color',
           label: 'Transcript background color',
           hover_tip: 'Background color for the live transcript',
-          default: '#ffd700'
+          default: gold
         },
         transcript_foreground: {
           type: 'color',
           label: 'Transcript text color',
           hover_tip: 'Text color for the live transcript',
-          default: '#000000'
+          default: black
         },
         transcript_position: {
           type: 'dropdown',
