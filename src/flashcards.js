@@ -79,6 +79,9 @@ function getReadings(entries) {
 }
 
 function literalMatches(candidate, prompt) {
+  if (!isJapanese(candidate.data)) {
+    return null;
+  }
   const data = candidate.data;
   if (normalize(data) === normalize(prompt)) {
     return prompt;
@@ -196,10 +199,10 @@ export function checkAnswer(dictionary, raw) {
 
     if (readingMatch) {
       result = success(candidate, readingMatch);
-    } else if (meaningMatch) {
-      result = success(candidate, meaningMatch);
     } else if (literal && readings.length > 0) {
       result = success(candidate, readings[0]); // TODO indicate literal match?
+    } else if (meaningMatch) {
+      result = success(candidate, meaningMatch);
     }
   }
 
