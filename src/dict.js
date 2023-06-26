@@ -1,6 +1,6 @@
 function addEntry(dictionary, key, entry) {
   if (!dictionary[key]) {
-    dictionary[key] = [];
+    dictionary[key] = entry;
   }
   dictionary[key].push(entry);
 }
