@@ -10,6 +10,7 @@ import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
+import { Sudachi } from './candidates/sudachi.js';
 
 function onStart() {
   wk.checkDom();
@@ -24,9 +25,14 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
   let lightning = false;
   let transcript = raw;
 
+  const withSudachi = [...transformers, new Sudachi(unsafeWindow)];
+
   if (state === "Ready") {
     const context = wk.getContext();
-    const result = checkAnswer(context, transformers, raw);
+
+    const ts = final ? withSudachi : transformers;
+
+    const result = checkAnswer(context, ts, raw);
     console.log('[wanikani-voice-input]', raw, result);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
@@ -56,7 +62,11 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
 
 function contextHasChanged(prev) {
   const curr = wk.getContext();
-  return prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type;
+  if (prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type) {
+    return curr;
+  } else {
+    return null;
+  }
 }
 
 function main(dictionary) {
@@ -99,7 +109,7 @@ function main(dictionary) {
     new BasicDictionary(dictionary),
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
-    new FuzzyVowels()
+    new FuzzyVowels(),
   ];
 
   const lang = wk.getLanguage();
@@ -126,6 +136,7 @@ function main(dictionary) {
     const lang = wk.getLanguage();
     setLanguage(recognition, lang);
     const context = contextHasChanged(previous);
+    console.log('mutationCallback', previous, context);
     if (state === "Flipping" && context) {
       setState("Ready");
       previous = context;
@@ -156,7 +167,6 @@ function main(dictionary) {
   state = "Ready";
 };
 
-
 if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
   initializeSettings(wkof, onStart);
@@ -180,4 +190,3 @@ const id = setInterval(function() {
     console.log("sudachi available");
   }
 }, 500);
-

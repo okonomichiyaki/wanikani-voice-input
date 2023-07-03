@@ -1,16 +1,16 @@
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
 
 export class Sudachi {
-  constructor(dictionary) {
+  constructor(window) {
+    this.window = window;
     this.order = 0;
   }
   getCandidates(raw) {
-    const window = unsafeWindow;
     const candidates = [];
-    if (window.tokenize && window.TokenizeMode) {
-      const data = JSON.parse(window.tokenize("今日は良い天気なり。", window.TokenizeMode.C));
+    if (isJapanese(raw) && this.window.tokenize && this.window.TokenizeMode) {
+      const data = JSON.parse(this.window.tokenize(raw, this.window.TokenizeMode.C));
       const candidate = data.map(d => toHiragana(d.dictionary_form)).join('');
-      candidates.push(candidate);
+      candidates.push({data: candidate, type: "sudachi"});
     }
     return candidates;
   }
