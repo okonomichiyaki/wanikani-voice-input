@@ -9,7 +9,7 @@ import { ToHiragana } from './candidates/to_hiragana.js';
 import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
-
+import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
 
 function onStart() {
   wk.checkDom();
@@ -98,7 +98,8 @@ function main(dictionary) {
     new ToHiragana(),
     new BasicDictionary(dictionary),
     new SuruVerbs(dictionary),
-    new RepeatingSubstring()
+    new RepeatingSubstring(),
+    new FuzzyVowels()
   ];
 
   const lang = wk.getLanguage();
