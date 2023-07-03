@@ -13,8 +13,10 @@ export function createRecognition(lang, callback) {
   recognition.lang = lang;
 
   recognition.onresult = (event) => {
-    console.log(event);
+    console.info('[wanikani-voice-input] onresult', event);
+
     setIndicator(getSettings(), '🎤');
+    const start = Date.now();
     let wasFinal = false;
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const transcript = event.results[i][0].transcript.trim();
@@ -23,8 +25,8 @@ export function createRecognition(lang, callback) {
       wasFinal = wasFinal || final;
     }
     if (wasFinal) {
-      setTimeout(clearIndicator, 100);
-//      clearIndicator();
+      const elapsed = Date.now() - start;
+      setTimeout(clearIndicator, Math.min(0, 750 - elapsed));
     }
   };
 

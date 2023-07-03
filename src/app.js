@@ -1,7 +1,7 @@
 import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
-import { initializeSettings, getSettings, isLightningOn } from './settings.js';
+import { initializeSettings, getSettings, isLightningOn, isSudachiOn } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
@@ -10,12 +10,16 @@ import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
-import { Sudachi } from './candidates/sudachi.js';
+import { Sudachi, initialize } from './candidates/sudachi.js';
 
 function onStart() {
-  wk.checkDom();
+  wk.checkDom(); // TODO: if failed check, show error
+  createTranscriptContainer(getSettings());
+  if (unsafeWindow.wkof) {
+    initialize(unsafeWindow);
+  }
   const dictionary = loadDictionary();
-  main(dictionary);
+  startListener(dictionary);
 }
 
 function handleSpeechRecognition(transformers, state, commands, raw, final) {
@@ -69,9 +73,7 @@ function contextHasChanged(prev) {
   }
 }
 
-function main(dictionary) {
-  createTranscriptContainer(getSettings());
-
+function startListener(dictionary) {
   let state = "Flipping";
   let previous = wk.getContext();
   let result = null;
@@ -170,23 +172,8 @@ function main(dictionary) {
 if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
   initializeSettings(wkof, onStart);
-  wkof.load_file('https://unpkg.com/sudachi@0.1.5/sudachi.js', true)
-    .then(function(raw) {
-      const el = document.createElement('script');
-      const code = raw + '; window.tokenize = tokenize; window.TokenizeMode = TokenizeMode;';
-      el.textContent = code;
-      el.type = 'module';
-      console.log("appending sudachi script");
-      document.head.appendChild(el);
-    });
 } else {
   console.log('[wanikani-voice-input] wkof not found?');
   onStart();
 }
 
-const id = setInterval(function() {
-  if (unsafeWindow.tokenize && unsafeWindow.TokenizeMode) {
-    clearInterval(id);
-    console.log("sudachi available");
-  }
-}, 500);

@@ -5,12 +5,17 @@ export function isLightningOn() {
   return getSettings().lightning;
 }
 
+export function isSudachiOn() {
+  return getSettings().sudachi;
+}
+
 export function getSettings() {
   if (unsafeWindow.wkof) {
     return unsafeWindow.wkof.settings['wanikani-voice-input'];
   }
   return {
     lightning: false,
+    sudachi: false,
     transcript: true,
     transcript_background: gold,
     transcript_foreground: black,
@@ -76,7 +81,13 @@ export function initializeSettings(wkof, onStart) {
             top: 'Top',
             bottom: 'Bottom'
           }
-        }
+        },
+        sudachi: {
+          type: 'checkbox',
+          label: 'Use Sudachi',
+          default: false,
+          hover_tip: 'If enabled, will download and use Sudachi, a morphological analyzer. This library may improve accuracy for some items but it is large (150 MB). Download is cached but start up time for review sessions will be slower while the library loads.',
+        },
       }
     };
     var dialog = new wkof.Settings(config);
