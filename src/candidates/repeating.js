@@ -15,3 +15,17 @@ export function findRepeatingSubstring(s) {
   }
   return null;
 }
+
+export class RepeatingSubstring {
+  constructor() {
+    this.order = 1;
+  }
+  getCandidates(raw) {
+    const candidates = [];
+    const substr = findRepeatingSubstring(raw);
+    if (substr) {
+      candidates.push({type: "repeating", data: substr});
+    }
+    return candidates;
+  }
+}

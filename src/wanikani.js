@@ -78,10 +78,28 @@ export function getPrompt() {
 
 // returns unique flashcard context: prompt + category + type
 export function getContext() {
+  // extra study: https://www.wanikani.com/subjects/extra_study?queue_type=recent_lessons
+  // main review: https://www.wanikani.com/subjects/review
+  // lesson intro: https://www.wanikani.com/subjects/6259/lesson?queue=6259-6260-6261-6262-6263
+  // lesson quiz: https://www.wanikani.com/subjects/lesson/quiz?queue=6259-6260-6261-6262-6263
   const prompt = getPrompt();
+  const subjects = getSubjects();
+  const items = prompt && subjects ? subjects[prompt] : [];
   const category = getCategory();
   const type = getType();
-  return {prompt, category, type};
+
+  const readings = [];
+  const meanings = [];
+  for (const item of items) {
+    if (item['readings']) {
+      readings.push(...item['readings'].map(r => r.reading));
+    }
+    meanings.push(...item['meanings']);
+    const synonyms = getUserSynonyms(item['id']);
+    meanings.push(...synonyms);
+  }
+
+  return { prompt, category, type, meanings, readings };
 }
 
 // looks up user synonym by (wanikani subject) id

@@ -5,13 +5,19 @@ import { initializeSettings, getSettings, isLightningOn } from './settings.js';
 import { createTranscriptContainer, setTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
+import { ToHiragana } from './candidates/to_hiragana.js';
+import { BasicDictionary } from './candidates/basic_dictionary.js';
+import { SuruVerbs } from './candidates/suru_verbs.js';
+import { RepeatingSubstring } from './candidates/repeating.js';
+
+
 function onStart() {
   wk.checkDom();
   const dictionary = loadDictionary();
   main(dictionary);
 }
 
-function handleSpeechRecognition(dictionary, state, commands, raw, final) {
+function handleSpeechRecognition(transformers, state, commands, raw, final) {
   let newState = state;
   let answer = null;
   let command = null;
@@ -19,7 +25,8 @@ function handleSpeechRecognition(dictionary, state, commands, raw, final) {
   let transcript = raw;
 
   if (state === "Ready") {
-    let result = checkAnswer(dictionary, raw);
+    const context = wk.getContext();
+    const result = checkAnswer(context, transformers, raw);
     console.log('[wanikani-voice-input]', raw, result);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
@@ -87,10 +94,17 @@ function main(dictionary) {
     'ネクスト': next,
   };
 
+  const transformers = [
+    new ToHiragana(),
+    new BasicDictionary(dictionary),
+    new SuruVerbs(dictionary),
+    new RepeatingSubstring()
+  ];
+
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
     console.log('[wanikani-voice-input]', wk.getContext());
-    let outcome = handleSpeechRecognition(dictionary, state, commands, raw, final);
+    let outcome = handleSpeechRecognition(transformers, state, commands, raw, final);
     setTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
@@ -143,8 +157,26 @@ function main(dictionary) {
 
 
 if (unsafeWindow.wkof) {
-  initializeSettings(unsafeWindow.wkof, onStart);
+  const wkof = unsafeWindow.wkof;
+  initializeSettings(wkof, onStart);
+  wkof.load_file('https://unpkg.com/sudachi@0.1.5/sudachi.js', true)
+    .then(function(raw) {
+      const el = document.createElement('script');
+      const code = raw + '; window.tokenize = tokenize; window.TokenizeMode = TokenizeMode;';
+      el.textContent = code;
+      el.type = 'module';
+      console.log("appending sudachi script");
+      document.head.appendChild(el);
+    });
 } else {
   console.log('[wanikani-voice-input] wkof not found?');
   onStart();
 }
+
+const id = setInterval(function() {
+  if (unsafeWindow.tokenize && unsafeWindow.TokenizeMode) {
+    clearInterval(id);
+    console.log("sudachi available");
+  }
+}, 500);
+

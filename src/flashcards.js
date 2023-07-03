@@ -2,15 +2,6 @@ import * as wk from './wanikani.js';
 import { clickSelector } from './util.js';
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
 import levenshtein from 'js-levenshtein';
-import { findRepeatingSubstring } from './repeating.js';
-
-function lookup(dictionary, s) {
-  const result = dictionary[s];
-  if (result) {
-    return result;
-  }
-  return [];
-}
 
 const homonyms = {
   'b': 'び',
@@ -57,26 +48,10 @@ const homonyms = {
   '借りに': 'かりに',
   '全開': 'ぜんかい',
   '九大': 'きゅうだい',
-  '最速': 'さいそく'
+  '最速': 'さいそく',
+  '龍騎': 'りゅうき',
+  '流星': 'りゅうせい'
 };
-
-function getReadings(entries) {
-  return entries.flatMap(entry => {
-    if (entry.type === 'word') {
-      return entry['kana'].map(toHiragana);
-    }
-    if (entry.type === 'character') {
-      return entry.readings.map(r => {
-        let value = r.value;
-        if (value.includes('.')) {
-          value = value.split('.')[0];
-        }
-        return toHiragana(value);
-      });
-    }
-    return [];
-  });
-}
 
 function literalMatches(candidate, prompt) {
   if (!isJapanese(candidate.data)) {
@@ -140,55 +115,33 @@ function success(candidate, answer) {
   };
 }
 
-export function checkAnswer(dictionary, raw) {
-  const subjects = wk.getSubjects();
-  const prompt = wk.getPrompt();
-  if (!prompt) {
-    return error("failed to find flashcard prompt");
-  }
-  const items = subjects[prompt];
-  if (!items || items.length < 1) {
-    return error(`failed to find item: ${prompt}`);
-  }
+function groupBy(xs, k) {
+  return xs.reduce(function(rv, x) {
+    (rv[x[k]] = rv[x[k]] || []).push(x);
+    return rv;
+  }, {});
+}
 
-  const readings = [];
-  const meanings = [];
-  for (const item of items) {
-    if (item['readings']) {
-      readings.push(...item['readings'].map(r => r.reading));
-    }
-    meanings.push(...item['meanings']);
-    const synonyms = wk.getUserSynonyms(item['id']);
-    meanings.push(...synonyms);
-  }
+export function checkAnswer(context, transformers, raw) {
+  const { meanings, readings, prompt } = context;
 
   let candidates = [];
   candidates.push({type: "raw", data: raw});
 
-  if (isJapanese(raw)) {
-    let hiragana = toHiragana(raw);
-    if (hiragana !== raw) {
-      candidates.push({"type": "hiragana", data: hiragana});
-    }
+  const byOrder = groupBy(transformers, 'order');
+  const keys = Object.keys(byOrder).map(k => parseInt(k)).sort();
 
-    if (hiragana.endsWith('する')) {
-      const entries = lookup(dictionary, hiragana.substring(0, hiragana.length - 2));
-      const rs = getReadings(entries).map(r => r + 'する');
-      for (let r of rs) {
-        candidates.push({type: "する", data: r});
-      }
-    } else {
-      const entries = lookup(dictionary, hiragana);
-      const rs = getReadings(entries);
-      for (let r of rs) {
-        candidates.push({type: "dictionary", data: r});
+  // generate candidates from transformers, in order
+  // output from transformers at one level are additional inputs for later levels
+  for (const key of keys) {
+    const ts = byOrder[key];
+    const newCandidates = [];
+    for (const t of ts) {
+      for (const c of candidates) {
+        newCandidates.push(...t.getCandidates(c.data));
       }
     }
-
-    const substr = findRepeatingSubstring(hiragana);
-    if (substr) {
-      candidates.push({type: "repeating", data: substr});
-    }
+    candidates.push(...newCandidates);
   }
 
   let result = incorrect();
