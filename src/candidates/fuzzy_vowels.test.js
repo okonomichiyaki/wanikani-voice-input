@@ -10,6 +10,10 @@ test('generate long vowel candidates', () => {
   expect(getCandidates('しょ')).toStrictEqual(['しいょ','しょう','しょお'].sort());
 });
 
+test('generate long vowel candidates with tenten', () => {
+  expect(getCandidates('で')).toStrictEqual(['でい','でえ'].sort());
+});
+
 test('generate short vowel candidates', () => {
   expect(getCandidates('しょう')).toStrictEqual(['しいょう','しょ'].sort());
 });
