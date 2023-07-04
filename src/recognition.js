@@ -1,6 +1,8 @@
 import { getSettings } from './settings.js';
 import { setIndicator, clearIndicator } from './live_transcript.js';
 
+const MIN_INDICATE = 100;
+
 export function createRecognition(lang, callback) {
   if (!('webkitSpeechRecognition' in window)) {
     console.error('[wanikani-voice-input] web speech not supported by this browser!');
@@ -26,7 +28,8 @@ export function createRecognition(lang, callback) {
     }
     if (wasFinal) {
       const elapsed = Date.now() - start;
-      setTimeout(clearIndicator, Math.min(0, 750 - elapsed));
+      const wait = elapsed < MIN_INDICATE ? MIN_INDICATE - elapsed : 0;
+      setTimeout(clearIndicator, wait);
     }
   };
 
