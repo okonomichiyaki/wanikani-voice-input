@@ -10,14 +10,10 @@ import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
-import { Sudachi, initialize } from './candidates/sudachi.js';
 
 function onStart() {
   wk.checkDom(); // TODO: if failed check, show error
   createTranscriptContainer(getSettings());
-  if (unsafeWindow.wkof) {
-    initialize(unsafeWindow);
-  }
   const dictionary = loadDictionary();
   startListener(dictionary);
 }
@@ -29,14 +25,11 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
   let lightning = false;
   let transcript = raw;
 
-  const withSudachi = [...transformers, new Sudachi(unsafeWindow)];
 
   if (state === "Ready") {
     const context = wk.getContext();
 
-    const ts = final ? withSudachi : transformers;
-
-    const result = checkAnswer(context, ts, raw);
+    const result = checkAnswer(context, transformers, raw);
     console.log('[wanikani-voice-input]', raw, result);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
@@ -138,7 +131,7 @@ function startListener(dictionary) {
     const lang = wk.getLanguage();
     setLanguage(recognition, lang);
     const context = contextHasChanged(previous);
-    console.log('mutationCallback', previous, context);
+//    console.log('mutationCallback', previous, context);
     if (state === "Flipping" && context) {
       setState("Ready");
       previous = context;
