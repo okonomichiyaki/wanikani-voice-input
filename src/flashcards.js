@@ -50,7 +50,9 @@ const homonyms = {
   '九大': 'きゅうだい',
   '最速': 'さいそく',
   '龍騎': 'りゅうき',
-  '流星': 'りゅうせい'
+  '流星': 'りゅうせい',
+  '京丹': 'きょうたん',
+  '広陵': 'こうりょう'
 };
 
 function literalMatches(candidate, prompt) {
