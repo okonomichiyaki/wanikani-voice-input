@@ -1,4 +1,4 @@
-import { toHiragana } from 'wanakana';
+import { toHiragana, isJapanese } from 'wanakana';
 
 // TODO: create dictionary class and move this there
 function lookup(dictionary, s) {
@@ -34,6 +34,9 @@ export class BasicDictionary {
   }
 
   getCandidates(raw) {
+    if (!isJapanese(raw)) {
+      return [];
+    }
     const candidates = [];
     const hiragana = toHiragana(raw);
     const entries = lookup(this.dictionary, hiragana);
