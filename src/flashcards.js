@@ -22,6 +22,7 @@ const homonyms = {
   'uber': 'うば',
   'hulu': 'ふる',
   'canyou': 'かんゆう',
+  'LINE': 'らい',
 
   '2': 'つ',
   '3': 'さん',
@@ -52,7 +53,8 @@ const homonyms = {
   '龍騎': 'りゅうき',
   '流星': 'りゅうせい',
   '京丹': 'きょうたん',
-  '広陵': 'こうりょう'
+  '広陵': 'こうりょう',
+  '招かれる': 'まねかれる',
 };
 
 function literalMatches(candidate, prompt) {
