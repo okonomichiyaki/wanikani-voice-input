@@ -15,7 +15,7 @@ export function createRecognition(lang, callback) {
   recognition.lang = lang;
 
   recognition.onresult = (event) => {
-    console.info('[wanikani-voice-input] onresult', event);
+    //console.info('[wanikani-voice-input] onresult', event);
 
     setIndicator(getSettings(), '🎤');
     const start = Date.now();

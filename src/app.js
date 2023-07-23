@@ -73,7 +73,7 @@ function startListener(dictionary) {
   let result = null;
 
   function setState(newState) {
-    console.log(`[wanikani-voice-input] >> ${newState}`);
+    //console.log(`[wanikani-voice-input] >> ${newState}`);
     state = newState;
   }
 
@@ -111,7 +111,6 @@ function startListener(dictionary) {
 
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
-    console.log('[wanikani-voice-input]', wk.getContext());
     let outcome = handleSpeechRecognition(transformers, state, commands, raw, final);
     setTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
