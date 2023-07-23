@@ -10,6 +10,7 @@ import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
+import { MultipleWords } from './candidates/multiple.js';
 
 function onStart() {
   wk.checkDom(); // TODO: if failed check, show error
@@ -105,6 +106,7 @@ function startListener(dictionary) {
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new FuzzyVowels(),
+    new MultipleWords(dictionary),
   ];
 
   const lang = wk.getLanguage();
