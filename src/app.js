@@ -105,7 +105,6 @@ function startListener(dictionary) {
     new BasicDictionary(dictionary),
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
-    new FuzzyVowels(),
     new MultipleWords(dictionary),
   ];
 
