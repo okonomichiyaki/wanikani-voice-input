@@ -56,6 +56,7 @@ export function logTranscript(settings, text) {
   transcript.textContent = newText;
 
   const container = document.querySelector('div#wanikani-voice-input-transcript-container');
+  container.style = getContainerStyle(settings);
   container.appendChild(transcript);
 
   // eventually fade new transcript:
