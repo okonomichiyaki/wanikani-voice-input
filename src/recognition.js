@@ -1,5 +1,4 @@
 import { getSettings } from './settings.js';
-import { setIndicator, clearIndicator } from './live_transcript.js';
 
 const MIN_INDICATE = 100;
 
@@ -17,19 +16,10 @@ export function createRecognition(lang, callback) {
   recognition.onresult = (event) => {
     //console.info('[wanikani-voice-input] onresult', event);
 
-    setIndicator(getSettings(), '🎤');
-    const start = Date.now();
-    let wasFinal = false;
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const transcript = event.results[i][0].transcript.trim();
       const final = event.results[i].isFinal;
       callback(transcript, final);
-      wasFinal = wasFinal || final;
-    }
-    if (wasFinal) {
-      const elapsed = Date.now() - start;
-      const wait = elapsed < MIN_INDICATE ? MIN_INDICATE - elapsed : 0;
-      setTimeout(clearIndicator, wait);
     }
   };
 

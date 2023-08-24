@@ -2,7 +2,7 @@ import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
 import { initializeSettings, getSettings, isLightningOn, isSudachiOn } from './settings.js';
-import { createTranscriptContainer, setTranscript } from './live_transcript.js';
+import { createTranscriptContainer, logTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
 import { ToHiragana } from './candidates/to_hiragana.js';
@@ -112,7 +112,7 @@ function startListener(dictionary) {
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
     let outcome = handleSpeechRecognition(transformers, state, commands, raw, final);
-    setTranscript(getSettings(), outcome.transcript);
+    logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
     }
@@ -136,7 +136,6 @@ function startListener(dictionary) {
     if (state === "Flipping" && context) {
       setState("Ready");
       previous = context;
-      setTranscript(getSettings(), '');
     }
   }
   const config = { attributes: true, childList: true, subtree: true };

@@ -14,7 +14,8 @@ export function getSettings() {
     transcript: true,
     transcript_background: gold,
     transcript_foreground: black,
-    transcript_position: "top"
+    transcript_position: "top",
+    transcript_delay: 5000
   };
 }
 
@@ -76,7 +77,22 @@ export function initializeSettings(wkof, onStart) {
             top: 'Top',
             bottom: 'Bottom'
           }
+        },
+        transcript_delay: {
+          type: 'number',
+          label: 'Transcript delay',
+          hover_tip: 'Duration in seconds before live transcripts disappear',
+          min: 0,
+          default: 5.0
+        },
+        transcript_count: {
+          type: 'number',
+          label: 'Transcript count',
+          hover_tip: 'How many live transcripts to show (recommend setting position to bottom if this is more then 1)',
+          min: 1,
+          default: 1
         }
+
       }
     };
     var dialog = new wkof.Settings(config);
