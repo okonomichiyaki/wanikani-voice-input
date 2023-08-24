@@ -110,6 +110,7 @@ function startListener(dictionary) {
 
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
+    logTranscript(getSettings(), raw);
     let outcome = handleSpeechRecognition(transformers, state, commands, raw, final);
     logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {

@@ -42,18 +42,26 @@ export function logTranscript(settings, text) {
   if (!settings.transcript) {
     return;
   }
-  const container = document.querySelector('div#wanikani-voice-input-transcript-container');
-  container.style = getContainerStyle(settings);
+  const newText = '🎤' + text;
+  const previous = document.getElementById(`transcript-${COUNTER - 1}`);
+  if (previous && newText === previous.textContent) {
+    return;
+  }
 
   const current = COUNTER++;
   const id = `transcript-${current}`;
   const transcript = document.createElement('p');
   transcript.id = id;
   transcript.style = getTranscriptStyle(settings);
-  transcript.textContent = text + ` ${current}`;
+  transcript.textContent = newText;
+
+  const container = document.querySelector('div#wanikani-voice-input-transcript-container');
   container.appendChild(transcript);
+
+  // eventually fade new transcript:
   setTimeout(clearTranscriptFn(id), settings.transcript_delay * 1000);
 
+  // clear old transcripts:
   const start = current - settings.transcript_count;
   const end = current - 10;
   for (let i = start; i >= end && i >= 0; i--) {
