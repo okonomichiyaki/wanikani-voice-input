@@ -58,7 +58,8 @@ const homonyms = {
   '県境': 'けんきょう',
   '胆汁': 'たんじゅう',
   '県名': 'けんめい',
-  '長江': 'ちょうこう'
+  '長江': 'ちょうこう',
+  '性感': 'せいかん'
 };
 
 function literalMatches(candidate, prompt) {

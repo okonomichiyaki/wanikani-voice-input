@@ -225,7 +225,6 @@ export function getSubjects() {
       result[key].push(subject);
     }
   }
-  console.log("[wanikani-voice-input] getSubjects:", result);
   return result;
 }
 

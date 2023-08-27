@@ -14,7 +14,6 @@ import { MultipleWords } from './candidates/multiple.js';
 
 function onStart() {
   const context = wk.getContext();
-//  console.log('[wanikani-voice-input]', context);
   if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
     startListener();
   }
