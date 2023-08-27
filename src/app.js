@@ -92,6 +92,7 @@ function startListener(dictionary) {
     'まちがい': wk.markWrong,
     'だめ': wk.markWrong,
     'ダメ': wk.markWrong,
+    '駄目': wk.markWrong,
     'next': next,
     'つぎ': next,
     '次': next,
