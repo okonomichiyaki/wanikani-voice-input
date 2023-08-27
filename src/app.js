@@ -13,10 +13,14 @@ import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
 import { MultipleWords } from './candidates/multiple.js';
 
 function onStart() {
-  wk.checkDom(); // TODO: if failed check, show error
-  createTranscriptContainer(getSettings());
-  const dictionary = loadDictionary();
-  startListener(dictionary);
+  const context = wk.getContext();
+//  console.log('[wanikani-voice-input]', context);
+  if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
+    startListener();
+  }
+  if (context.page === 'entry' && process.env.NODE_ENV !== 'production') {
+    startListener();
+  }
 }
 
 function handleSpeechRecognition(transformers, state, commands, raw, final) {
@@ -67,7 +71,10 @@ function contextHasChanged(prev) {
   }
 }
 
-function startListener(dictionary) {
+function startListener() {
+  createTranscriptContainer(getSettings());
+  const dictionary = loadDictionary();
+
   let state = "Flipping";
   let previous = wk.getContext();
   let result = null;
@@ -167,7 +174,5 @@ if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
   initializeSettings(wkof, onStart);
 } else {
-  console.log('[wanikani-voice-input] wkof not found?');
   onStart();
 }
-

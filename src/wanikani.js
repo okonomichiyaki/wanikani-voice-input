@@ -1,6 +1,11 @@
 // standalone functions to interact with WaniKani web app
 
 const Selectors = {
+  EntryPrompt: 'span.page-header__icon.page-header__icon',
+  EntryMeaning: '#section-meaning > section:nth-child(1) > div:nth-child(1) > p',
+  EntryAltMeanings: '#section-meaning > section:nth-child(1) > div:nth-child(2) > p',
+  EntryKanjiReading: '.subject-readings__reading--primary .subject-readings__reading-items',
+  EntryVocabReading: '.reading-with-audio__reading',
   Category: 'span.quiz-input__question-category',
   Type: 'span.quiz-input__question-type',
   Prompt: 'div.character-header__characters',
@@ -37,6 +42,15 @@ function getCategory() {
   if (category) {
     return category.textContent.trim().toLowerCase();
   }
+  if (document.location.href.match('vocabulary')) {
+    return 'vocabulary';
+  }
+  if (document.location.href.match('kanji')) {
+    return 'kanji';
+  }
+  if (document.location.href.match('radicals')) {
+    return 'radical';
+  }
   return null;
 }
 
@@ -45,6 +59,15 @@ function getType() {
   const type = document.querySelector(Selectors.Type);
   if (type) {
     return type.textContent.trim().toLowerCase();
+  }
+  if (document.location.href.match('vocabulary')) {
+    return 'reading';
+  }
+  if (document.location.href.match('kanji')) {
+    return 'reading';
+  }
+  if (document.location.href.match('radicals')) {
+    return 'name';
   }
   return null;
 }
@@ -60,11 +83,24 @@ export function getLanguage() {
   return 'en-US';
 }
 
-// returns flashcard "front"
+// returns flashcard "front" from single entry pages
+function getPromptFromEntry() {
+  const el = document.querySelector(Selectors.EntryPrompt);
+  if (!el) {
+    return null;
+  }
+  let prompt = el.textContent;
+  if (prompt === '') {
+    return null;
+  }
+  return prompt;
+}
+
+// returns flashcard "front" during quizzes
 export function getPrompt() {
   const el = document.querySelector(Selectors.Prompt);
   if (!el) {
-    return null;
+    return getPromptFromEntry();
   }
   let prompt = el.textContent; // kanji, vocab
   if (prompt === '' && el.childNodes.length > 0 && el.childNodes[0].getAttribute('aria-label')) {
@@ -82,6 +118,21 @@ export function getContext() {
   // main review: https://www.wanikani.com/subjects/review
   // lesson intro: https://www.wanikani.com/subjects/6259/lesson?queue=6259-6260-6261-6262-6263
   // lesson quiz: https://www.wanikani.com/subjects/lesson/quiz?queue=6259-6260-6261-6262-6263
+  // entry: https://www.wanikani.com/(vocabulary|radicals|kanji)/*
+
+  let page = '';
+  if (document.location.href.match('review')) {
+    page = 'review';
+  }
+  if (document.location.href.match('lesson')) {
+    page = 'lesson';
+  }
+  if (document.location.href.match('quiz')) {
+    page = 'quiz';
+  }
+  if (document.location.href.match('vocabulary|radicals|kanji')) {
+    page = 'entry';
+  }
   const prompt = getPrompt();
   const subjects = getSubjects();
   const items = prompt && subjects ? subjects[prompt] : [];
@@ -99,7 +150,7 @@ export function getContext() {
     meanings.push(...synonyms);
   }
 
-  return { prompt, category, type, meanings, readings };
+  return { page, prompt, category, type, meanings, readings };
 }
 
 // looks up user synonym by (wanikani subject) id
@@ -114,11 +165,42 @@ export function getUserSynonyms(id) {
   return [];
 }
 
+// flashcard "backs" for a single entry page
+function getEntrySubjects() {
+  const prompt = getPromptFromEntry();
+  const meaning = document.querySelector(Selectors.EntryMeaning);
+  let reading = document.querySelector(Selectors.EntryKanjiReading);
+  if (!reading) {
+    reading = document.querySelector(Selectors.EntryVocabReading);
+  }
+  if (!prompt || !meaning || !reading) {
+    return null;
+  }
+  const result = {};
+  const subject = {};
+  subject.meanings = [meaning.textContent];
+  subject.readings = [{reading: reading.textContent.trim()}];
+  result[meaning.textContent] = [subject];
+  result[subject.readings[0]] = [subject];
+  result[prompt] = [subject];
+
+  const alts = document.querySelector(Selectors.EntryAltMeaning);
+  if (alts) {
+    const meanings = alts.textContent.split(',').map(t => t.trim());
+    for (const m of meanings) {
+      result[m] = [subject];
+    }
+    subject.meanings.push(...meanings);
+  }
+
+  return result;
+}
+
 // flashcard "backs" for this review session
 export function getSubjects() {
   const script = document.querySelector(Selectors.Subjects);
   if (!script) {
-    return null;
+    return getEntrySubjects();
   }
   const subjects = JSON.parse(script.textContent);
   const result = {};
@@ -143,6 +225,7 @@ export function getSubjects() {
       result[key].push(subject);
     }
   }
+  console.log("[wanikani-voice-input] getSubjects:", result);
   return result;
 }
 
