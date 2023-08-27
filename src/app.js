@@ -11,6 +11,7 @@ import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
 import { MultipleWords } from './candidates/multiple.js';
+import { Numerals } from './candidates/numerals.js';
 
 function onStart() {
   const context = wk.getContext();
@@ -113,6 +114,7 @@ function startListener() {
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new MultipleWords(dictionary),
+    new Numerals(dictionary)
   ];
 
   const lang = wk.getLanguage();
