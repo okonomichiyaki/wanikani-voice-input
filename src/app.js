@@ -29,7 +29,7 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
   let command = null;
   let lightning = false;
   let transcript = raw;
-
+  let candidate = null;
 
   if (state === "Ready") {
     const context = wk.getContext();
@@ -43,9 +43,11 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
       if (final) {
         newState = "Flipping";
         answer = result.answer;
+        candidate = result.candidate;
       } else {
         newState = "Waiting";
         answer = result.answer;
+        candidate = result.candidate;
       }
     } else if (result.error) {
       transcript = "!! " + result.message + " !!";
@@ -59,7 +61,7 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
     command = commands[raw];
   }
 
-  return { newState, transcript, answer, command, lightning };
+  return { newState, transcript, answer, candidate, command, lightning };
 }
 
 function contextHasChanged(prev) {
@@ -114,7 +116,8 @@ function startListener() {
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new MultipleWords(dictionary),
-    new Numerals(dictionary)
+    new Numerals(dictionary),
+    new FuzzyVowels()
   ];
 
   const lang = wk.getLanguage();
@@ -126,7 +129,11 @@ function startListener() {
       setState(outcome.newState);
     }
     if (outcome.answer) {
-      wk.submitAnswer(outcome.answer);
+      if (outcome.candidate.type === 'fuzzy' && getSettings().fuzzy) {
+          wk.inputAnswer(outcome.answer);
+      } else if (outcome.candidate.type !== 'fuzzy') {
+          wk.submitAnswer(outcome.answer);
+      }
     }
     if (outcome.lightning) {
       setTimeout(wk.clickNext, 100);

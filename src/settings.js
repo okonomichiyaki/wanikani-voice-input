@@ -10,6 +10,7 @@ export function getSettings() {
     return unsafeWindow.wkof.settings['wanikani-voice-input'];
   }
   return {
+    fuzzy: false,
     lightning: false,
     transcript: true,
     transcript_background: gold,
@@ -49,6 +50,12 @@ export function initializeSettings(wkof, onStart) {
           label: 'Lightning mode',
           default: false,
           hover_tip: 'If enabled, automatically advance to the next flashcard on correct answers. If enabled, please disable lightning mode from any other scripts.',
+        },
+        fuzzy: {
+          type: 'checkbox',
+          label: 'Fuzzy match long vowels',
+          default: false,
+          hover_tip: 'If enabled, short and long vowel sounds will match using more forgiving logic. For example, will accept「しょう」for「しょ」and vice versa. Answers matched this way will only get entered into the text box, so you can evaluate yourself if you were right or wrong.',
         },
         transcript: {
           type: 'checkbox',
@@ -92,7 +99,6 @@ export function initializeSettings(wkof, onStart) {
           min: 1,
           default: 1
         }
-
       }
     };
     var dialog = new wkof.Settings(config);
