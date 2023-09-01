@@ -85,7 +85,8 @@ function readingMatches(candidate, readings) {
 
 function normalize(s) {
   // TODO remove punctuation
-  return s.toLowerCase().replaceAll(' ', '');
+  const n = s.toLowerCase().replaceAll(' ', '');
+  return toHiragana(n);
 }
 
 function meaningMatches(candidate, meanings) {
