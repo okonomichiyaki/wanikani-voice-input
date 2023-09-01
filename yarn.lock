@@ -2539,6 +2539,11 @@ json5@^2.2.0, json5@^2.2.1, json5@^2.2.2:
   resolved "https://registry.yarnpkg.com/json5/-/json5-2.2.3.tgz#78cd6f1a19bdc12b73db5ad0c61efd66c1e29283"
   integrity sha512-XmOWe7eyHYH14cLdVPoyg+GOH3rYX++KpzrylJwSW98t3Nk+U8XOl8FWKOgwtzdb8lXGf6zYwDUzeHMWfxasyg==
 
+kansuji@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/kansuji/-/kansuji-1.1.0.tgz#eac534e5cae07862e74d6b745bc5861b783eecd4"
+  integrity sha512-zw+QQSoH/nLvm5yJVPUY6kCP9lDSfVxO8poib8lOwruHqxOUZgKzMEdog1/PAen4G8ppoMulffzeVfCGgHgyhw==
+
 kleur@^3.0.3:
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/kleur/-/kleur-3.0.3.tgz#a79c9ecc86ee1ce3fa6206d1216c501f147fc07e"

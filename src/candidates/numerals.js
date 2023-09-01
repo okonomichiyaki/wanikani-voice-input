@@ -1,32 +1,19 @@
-import { BasicDictionary } from './basic_dictionary.js';
-
-const nums = '０１２３４５６７８９'.split('');
-const chars = '0一二三四五六七八九';
+import kansuji from 'kansuji';
 
 export class Numerals {
-  constructor(dictionary) {
+  constructor() {
     this.order = 0;
-    this.basicDictionary = new BasicDictionary(dictionary);
   }
 
   getCandidates(raw) {
-    if (!raw.match(/\d+/)) {
+    const match = raw.match(/\d+/);
+    if (!match) {
       return [];
     }
-    let withnums = raw;
-    for (let i = 0; i < nums.length; i++) {
-      withnums = withnums.replaceAll(i.toString(), nums[i]);
-    }
-    const candidates = this.basicDictionary.getCandidates(withnums);
-
-    let withchars = raw;
-    for (let i = 0; i < chars.length; i++) {
-      withchars = withchars.replaceAll(i.toString(), chars[i]);
-    }
-    candidates.push({data: withchars});
-    for (const c of candidates) {
-      c.type = 'numeral';
-    }
-    return candidates;
+    const part = match[0];
+    const converted = kansuji(part);
+    const data = raw.replace(part, converted);
+    const type = 'numeral';
+    return [{data, type}];
   }
 }

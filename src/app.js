@@ -114,7 +114,7 @@ function startListener() {
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new MultipleWords(dictionary),
-    new Numerals(dictionary)
+    new Numerals()
   ];
 
   const lang = wk.getLanguage();
