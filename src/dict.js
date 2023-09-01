@@ -1,8 +1,8 @@
-function addEntry(dictionary, key, entry) {
+function addEntry(dictionary, key, entries) {
   if (!dictionary[key]) {
-    dictionary[key] = entry;
+    dictionary[key] = [];
   }
-  dictionary[key].push(entry);
+  dictionary[key].push(...entries);
 }
 
 export function loadDictionary() {
