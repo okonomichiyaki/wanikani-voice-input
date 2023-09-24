@@ -27,9 +27,12 @@ export class Numerals {
       candidates.push({data, type});
     }
 
-    let converted = kansuji(part);
-    let data = raw.replace(part, converted);
-    candidates.push({data, type});
+    if (raw === part || anyJapanese(raw)) {
+      let converted = kansuji(part);
+      let data = raw.replace(part, converted);
+      candidates.push({data, type});
+    }
+
     return candidates;
   }
 }
