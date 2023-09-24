@@ -9,6 +9,7 @@
   "dependencies": {
     "js-levenshtein": "^1.1.6",
     "kansuji": "^1.1.0",
+    "to-words": "^3.6.1",
     "wanakana": "^5.1.0"
   },
   "scripts": {

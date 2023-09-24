@@ -109,19 +109,25 @@ function error(message) {
   };
 }
 
-function incorrect() {
+function incorrect(context, candidates) {
   return {
     error: false,
     message: "incorrect answer",
+    meanings: context.meanings,
+    readings: context.readings,
+    candidates
   };
 }
 
-function success(candidate, answer) {
+function success(context, candidates, candidate, answer) {
   return {
     success: true,
     message: "correct answer",
-    candidate: candidate,
-    answer: answer
+    candidate,
+    answer,
+    meanings: context.meanings,
+    readings: context.readings,
+    candidates
   };
 }
 
@@ -154,23 +160,20 @@ export function checkAnswer(context, transformers, raw) {
     candidates.push(...newCandidates);
   }
 
-  let result = incorrect();
   for (const candidate of candidates) {
     const meaningMatch = meaningMatches(candidate, meanings);
     const readingMatch = readingMatches(candidate, readings);
     const literal = literalMatches(candidate, prompt);
 
-    if (readingMatch) {
-      result = success(candidate, readingMatch);
+    console.log('', context, candidate, meaningMatch, readingMatch, literal);
+    if (readingMatch && context.type === 'reading') {
+      return success(context, candidates, candidate, readingMatch);
+    } else if (meaningMatch && (context.type === 'name' || context.type === 'meaning')) {
+      return success(context, candidates, candidate, meaningMatch);
     } else if (literal && readings.length > 0) {
-      result = success(candidate, readings[0]); // TODO indicate literal match?
-    } else if (meaningMatch) {
-      result = success(candidate, meaningMatch);
+      return success(context, candidates, candidate, readings[0]); // TODO indicate literal match?
     }
   }
 
-  result.candidates = candidates;
-  result.meanings = meanings;
-  result.readings = readings;
-  return result;
+  return incorrect(context, candidates);
 }
