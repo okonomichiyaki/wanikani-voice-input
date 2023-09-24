@@ -60,6 +60,12 @@ function getType() {
   if (type) {
     return type.textContent.trim().toLowerCase();
   }
+  if (document.location.href.match('#reading')) {
+    return 'reading';
+  }
+  if (document.location.href.match('#meaning')) {
+    return 'meaning';
+  }
   if (document.location.href.match('vocabulary')) {
     return 'reading';
   }
