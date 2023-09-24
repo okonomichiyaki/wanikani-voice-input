@@ -41,7 +41,6 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
     }
     if (result.success) {
       if (final) {
-        newState = "Flipping";
         answer = result.answer;
       } else {
         newState = "Waiting";
@@ -52,10 +51,10 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
     }
   }
   if (state === "Waiting" && final) {
-    newState = "Flipping";
+    newState = "Ready";
     lightning = isLightningOn();
   }
-  if ((state === "Ready" || state === "Flipping") && final && commands[raw]) {
+  if (state === "Ready" && final && commands[raw]) {
     command = commands[raw];
   }
 
@@ -75,7 +74,7 @@ function startListener() {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
-  let state = "Flipping";
+  let state = "Ready";
   let previous = wk.getContext();
   let result = null;
 
@@ -86,7 +85,7 @@ function startListener() {
 
   function next() {
     wk.clickNext();
-    setState("Flipping");
+    setState("Ready");
   }
 
   const commands = {
@@ -140,12 +139,6 @@ function startListener() {
   function mutationCallback(mutations, observer) {
     const lang = wk.getLanguage();
     setLanguage(recognition, lang);
-    const context = contextHasChanged(previous);
-//    console.log('mutationCallback', previous, context);
-    if (state === "Flipping" && context) {
-      setState("Ready");
-      previous = context;
-    }
   }
   const config = { attributes: true, childList: true, subtree: true };
   const observer = new MutationObserver(mutationCallback);
@@ -154,11 +147,8 @@ function startListener() {
   // lightning mode and auto show info on wrong:
   window.addEventListener("didAnswerQuestion", function(e) {
     if (wk.didAnswerCorrectly(e)) {
-      if (state === "Ready") { // for manual input
-        state = "Flipping";
-        if (isLightningOn()) {
-          setTimeout(wk.clickNext, 100);
-        }
+      if (isLightningOn()) {
+        setTimeout(wk.clickNext, 100);
       }
     } else {
       if (isLightningOn()) {
