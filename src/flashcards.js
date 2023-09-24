@@ -165,7 +165,6 @@ export function checkAnswer(context, transformers, raw) {
     const readingMatch = readingMatches(candidate, readings);
     const literal = literalMatches(candidate, prompt);
 
-    console.log('', context, candidate, meaningMatch, readingMatch, literal);
     if (readingMatch && context.type === 'reading') {
       return success(context, candidates, candidate, readingMatch);
     } else if (meaningMatch && (context.type === 'name' || context.type === 'meaning')) {

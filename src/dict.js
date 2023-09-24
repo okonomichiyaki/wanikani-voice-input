@@ -15,7 +15,5 @@ export function loadDictionary() {
   for (const [k, v] of Object.entries(kanji)) {
     addEntry(dictionary, k, v);
   }
-  const entries = Object.keys(dictionary).length;
-  console.log(`[wanikani-voice-input] got dictionary with ${entries} entries`);
   return dictionary;
 }
