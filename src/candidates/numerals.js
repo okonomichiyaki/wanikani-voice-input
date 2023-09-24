@@ -1,5 +1,10 @@
 import kansuji from 'kansuji';
 import { ToWords } from 'to-words';
+import { isJapanese } from 'wanakana';
+
+function anyJapanese(s) {
+  return s.split('').some(c => isJapanese(c));
+}
 
 export class Numerals {
   constructor() {
@@ -15,13 +20,14 @@ export class Numerals {
     const type = 'numeral';
     const part = match[0];
 
-    if (part === raw) {
+    if (!anyJapanese(raw)) {
       const toWords = new ToWords();
-      let data = toWords.convert(raw);
+      let converted = toWords.convert(part);
+      let data = raw.replace(part, converted);
       candidates.push({data, type});
     }
 
-    const converted = kansuji(part);
+    let converted = kansuji(part);
     let data = raw.replace(part, converted);
     candidates.push({data, type});
     return candidates;
