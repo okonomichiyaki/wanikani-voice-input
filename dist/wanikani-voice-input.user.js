@@ -4,7 +4,7 @@
 // @version      0.3.2
 // @description  Enables doing WaniKani reviews and lessons via voice input using Web Speech API
 // @author       okonomichiyaki
-// @match        https://www.wanikani.com/subjects/*
+// @match        https://www.wanikani.com/*
 
 // @resource     jmdict      https://raw.githubusercontent.com/okonomichiyaki/wanikani-voice-input/0.3.2/data/jmdict.json
 // @resource     kanjidic2   https://raw.githubusercontent.com/okonomichiyaki/wanikani-voice-input/0.3.2/data/kanjidic2.json
