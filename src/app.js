@@ -13,29 +13,28 @@ import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
 import { MultipleWords } from './candidates/multiple.js';
 import { Numerals } from './candidates/numerals.js';
 
-function onStart() {
-  const context = wk.getContext();
+function onStart(settings, items) {
+  const context = wk.getContext(items);
   if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
-    startListener();
+    startListener(items);
   }
   if (context.page === 'entry' && process.env.NODE_ENV !== 'production') {
-    startListener();
+    startListener(items);
   }
 }
 
-function handleSpeechRecognition(transformers, state, commands, raw, final) {
+function handleSpeechRecognition(items, transformers, state, commands, raw, final) {
   let newState = state;
   let answer = null;
   let command = null;
   let lightning = false;
   let transcript = raw;
 
-
   if (state === "Ready") {
-    const context = wk.getContext();
+    const context = wk.getContext(items);
 
     const result = checkAnswer(context, transformers, raw);
-    console.log('[wanikani-voice-input]', raw, result);
+    console.log('[wanikani-voice-input]', raw, result, context);
     if (result.candidate && transcript !== result.candidate.data) {
       transcript = transcript + ` (${result.candidate.data})`;
     }
@@ -61,12 +60,12 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
   return { newState, transcript, answer, command, lightning };
 }
 
-function startListener() {
+function startListener(items) {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
   let state = "Ready";
-  let previous = wk.getContext();
+  let previous = wk.getContext(items);
   let result = null;
 
   function setState(newState) {
@@ -110,7 +109,7 @@ function startListener() {
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
     logTranscript(getSettings(), raw);
-    let outcome = handleSpeechRecognition(transformers, state, commands, raw, final);
+    let outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
     logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
@@ -152,9 +151,17 @@ function startListener() {
   state = "Ready";
 };
 
+async function loadWkof(wkof) {
+  wkof.include('Menu,Settings,ItemData');
+  await wkof.ready('Menu,Settings,ItemData');
+  const settings = initializeSettings(wkof);
+  const items = await wkof.ItemData.get_items();
+  onStart(settings, items);
+}
+
 if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
-  initializeSettings(wkof, onStart);
+  loadWkof(unsafeWindow.wkof);
 } else {
-  onStart();
+  onStart(getSettings(), null);
 }

@@ -2,30 +2,12 @@
 
 const Selectors = {
   EntryPrompt: 'span.page-header__icon.page-header__icon',
-  EntryMeaning: '#section-meaning > section:nth-child(1) > div:nth-child(1) > p',
-  EntryAltMeanings: '#section-meaning > section:nth-child(1) > div:nth-child(2) > p',
-  EntryKanjiReading: '.subject-readings__reading--primary .subject-readings__reading-items',
-  EntryVocabReading: '.reading-with-audio__reading',
   Category: 'span.quiz-input__question-category',
   Type: 'span.quiz-input__question-type',
   Prompt: 'div.character-header__characters',
-  LessonMeaning: 'div.character-header__meaning',
   Synonyms: '#quiz-user-synonyms script',
-  Subjects: '#quiz-queue > script[data-quiz-queue-target="subjects"]',
   Next: 'div.quiz-input__input-container button',
 };
-
-function getOtherMeanings() {
-  const sections = document.querySelectorAll('section.subject-section');
-  for (const section of sections) {
-    const title = section.querySelector('span.subject-section__title-text');
-    const content = section.querySelector('section.subject-section__content');
-    if (title && title.textContent === 'Other Meanings') {
-      return content.textContent;
-    }
-  }
-  return [];
-}
 
 export function checkDom() {
   for (const selector of Object.keys(Selectors)) {
@@ -118,8 +100,43 @@ export function getPrompt() {
   return prompt;
 }
 
+function getMeaningsFromItems(items) {
+  const meanings = [];
+  for (let item of items) {
+    if (item && item.data && item.data.meanings) {
+      meanings.push(...item.data.meanings.filter(m => m.accepted_answer));
+    }
+    if (item && item.data && item.data.auxiliary_meanings) {
+      meanings.push(...item.data.auxiliary_meanings.filter(m => m.accepted_answer));
+    }
+  }
+  return meanings.map(m => m.meaning);
+}
+
+function getReadingsFromItems(items) {
+  const readings = [];
+  for (let item of items) {
+    if (item && item.data && item.data.readings) {
+      readings.push(...item.data.readings.filter(r => r.accepted_answer));
+    }
+  }
+  return readings.map(r => r.reading);
+}
+
+// flashcard "backs" for this card
+function getItems(allItems, category, slug) {
+  const items = [];
+  if (unsafeWindow.wkof) {
+    const wkof = unsafeWindow.wkof;
+    const type_index = wkof.ItemData.get_index(allItems, 'item_type');
+    const index = type_index[category];
+    items.push(...index.filter(i => i.data.characters === slug));
+  }
+  return items;
+}
+
 // returns unique flashcard context: prompt + category + type
-export function getContext() {
+export function getContext(allItems) {
   // extra study: https://www.wanikani.com/subjects/extra_study?queue_type=recent_lessons
   // main review: https://www.wanikani.com/subjects/review
   // lesson intro: https://www.wanikani.com/subjects/6259/lesson?queue=6259-6260-6261-6262-6263
@@ -140,23 +157,16 @@ export function getContext() {
     page = 'entry';
   }
   const prompt = getPrompt();
-  const subjects = getSubjects();
-  const items = prompt && subjects ? subjects[prompt] : [];
   const category = getCategory();
   const type = getType();
-
-  const readings = [];
-  const meanings = [];
+  const items = getItems(allItems, category, prompt);
+  const readings = getReadingsFromItems(items);
+  const meanings = getMeaningsFromItems(items);
   for (const item of items) {
-    if (item['readings']) {
-      readings.push(...item['readings'].map(r => r.reading));
-    }
-    meanings.push(...item['meanings']);
     const synonyms = getUserSynonyms(item['id']);
     meanings.push(...synonyms);
   }
-
-  return { page, prompt, category, type, meanings, readings };
+  return { page, prompt, category, type, meanings, readings, items };
 }
 
 // looks up user synonym by (wanikani subject) id
@@ -169,69 +179,6 @@ export function getUserSynonyms(id) {
     }
   }
   return [];
-}
-
-// flashcard "backs" for a single entry page
-function getEntrySubjects() {
-  const prompt = getPromptFromEntry();
-  const meaning = document.querySelector(Selectors.EntryMeaning);
-  let reading = document.querySelector(Selectors.EntryKanjiReading);
-  if (!reading) {
-    reading = document.querySelector(Selectors.EntryVocabReading);
-  }
-  if (!prompt || !meaning || !reading) {
-    return null;
-  }
-  const result = {};
-  const subject = {};
-  subject.meanings = [meaning.textContent];
-  subject.readings = [{reading: reading.textContent.trim()}];
-  result[meaning.textContent] = [subject];
-  result[subject.readings[0]] = [subject];
-  result[prompt] = [subject];
-
-  const alts = document.querySelector(Selectors.EntryAltMeaning);
-  if (alts) {
-    const meanings = alts.textContent.split(',').map(t => t.trim());
-    for (const m of meanings) {
-      result[m] = [subject];
-    }
-    subject.meanings.push(...meanings);
-  }
-
-  return result;
-}
-
-// flashcard "backs" for this review session
-export function getSubjects() {
-  const script = document.querySelector(Selectors.Subjects);
-  if (!script) {
-    return getEntrySubjects();
-  }
-  const subjects = JSON.parse(script.textContent);
-  const result = {};
-  for (const subject of subjects) {
-    if (subject.primary_reading_type) {
-      const readings = subject[subject.primary_reading_type].map(function (r) { return {reading: r}; });
-      subject.readings = readings;
-    }
-    if (subject.type === 'Radical') {
-      subject.readings = [];
-    }
-    const synonyms = getUserSynonyms(subject.id);
-    subject.meanings.push(...synonyms);
-    const keys = [subject.id, subject.characters];
-    for (const meaning of subject.meanings) {
-      keys.push(meaning.toLowerCase());
-    }
-    for (const key of keys) {
-      if (!result[key]) {
-        result[key] = [];
-      }
-      result[key].push(subject);
-    }
-  }
-  return result;
 }
 
 export function clickNext() {
