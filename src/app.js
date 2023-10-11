@@ -15,6 +15,9 @@ import { Numerals } from './candidates/numerals.js';
 
 function onStart(settings, items) {
   const context = wk.getContext(items);
+  if (!context) {
+    return;
+  }
   if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
     startListener(items);
   }

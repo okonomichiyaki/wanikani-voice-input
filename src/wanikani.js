@@ -143,7 +143,7 @@ export function getContext(allItems) {
   // lesson quiz: https://www.wanikani.com/subjects/lesson/quiz?queue=6259-6260-6261-6262-6263
   // entry: https://www.wanikani.com/(vocabulary|radicals|kanji)/*
 
-  let page = '';
+  let page = null;
   if (document.location.href.match('review')) {
     page = 'review';
   }
@@ -153,8 +153,14 @@ export function getContext(allItems) {
   if (document.location.href.match('quiz')) {
     page = 'quiz';
   }
+  if (document.location.href.match('recent-mistakes')) {
+    page = 'quiz';
+  }
   if (document.location.href.match('vocabulary|radicals|kanji')) {
     page = 'entry';
+  }
+  if (!page) {
+    return null;
   }
   const prompt = getPrompt();
   const category = getCategory();
