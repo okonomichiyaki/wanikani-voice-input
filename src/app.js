@@ -61,15 +61,6 @@ function handleSpeechRecognition(transformers, state, commands, raw, final) {
   return { newState, transcript, answer, command, lightning };
 }
 
-function contextHasChanged(prev) {
-  const curr = wk.getContext();
-  if (prev.prompt !== curr.prompt || prev.category !== curr.category || prev.type !== curr.type) {
-    return curr;
-  } else {
-    return null;
-  }
-}
-
 function startListener() {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
