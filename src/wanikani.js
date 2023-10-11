@@ -130,7 +130,9 @@ function getItems(allItems, category, slug) {
     const wkof = unsafeWindow.wkof;
     const type_index = wkof.ItemData.get_index(allItems, 'item_type');
     const index = type_index[category];
-    items.push(...index.filter(i => i.data.characters === slug));
+    if (index) {
+      items.push(...index.filter(i => i.data.characters === slug));
+    }
   }
   return items;
 }
