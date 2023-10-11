@@ -163,5 +163,9 @@ if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
   loadWkof(unsafeWindow.wkof);
 } else {
-  onStart(getSettings(), null);
+  const script = 'Voice Input';
+  const msg = `${script} requires Wanikani Open Framework.\nDo you want to be forwarded to the installation instructions?`;
+  if (confirm(msg)) {
+    window.location.href = 'https://community.wanikani.com/t/instructions-installing-wanikani-open-framework/28549';
+  }
 }
