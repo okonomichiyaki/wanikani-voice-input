@@ -120,9 +120,6 @@ function startListener(items) {
     if (outcome.answer) {
       wk.submitAnswer(outcome.answer);
     }
-    if (outcome.lightning) {
-      setTimeout(wk.clickNext, 100);
-    }
     if (outcome.command) {
       outcome.command();
     }
