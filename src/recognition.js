@@ -1,5 +1,3 @@
-import { getSettings } from './settings.js';
-
 const MIN_INDICATE = 100;
 
 export function createRecognition(lang, callback) {
