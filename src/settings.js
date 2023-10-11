@@ -2,6 +2,7 @@ const gold = '#ffd700';
 const black = '#000000';
 const defaults = {
   lightning: false,
+  lightning_delay: 0.1,
   transcript: true,
   transcript_background: gold,
   transcript_foreground: black,
@@ -17,6 +18,13 @@ const config = {
       label: 'Lightning mode',
       default: false,
       hover_tip: 'If enabled, automatically advance to the next flashcard on correct answers. If enabled, please disable lightning mode from any other scripts.',
+    },
+    lightning_delay: {
+      type: 'number',
+      label: 'Lightning delay',
+      hover_tip: 'Duration in seconds before lightning mode advances to the next card',
+      min: 0,
+      default: 0.1
     },
     transcript: {
       type: 'checkbox',

@@ -138,11 +138,11 @@ function startListener(items) {
   window.addEventListener("didAnswerQuestion", function(e) {
     if (wk.didAnswerCorrectly(e)) {
       if (isLightningOn()) {
-        setTimeout(wk.clickNext, 100);
+        setTimeout(wk.clickNext, getSettings().lightning_delay * 1000);
       }
     } else {
       if (isLightningOn()) {
-        setTimeout(wk.clickInfo, 100);
+        setTimeout(wk.clickInfo, getSettings().lightning_delay * 1000);
       }
     }
   });
