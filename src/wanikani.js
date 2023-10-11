@@ -158,6 +158,9 @@ export function getContext(allItems) {
   if (document.location.href.match('recent-mistakes')) {
     page = 'quiz';
   }
+  if (document.location.href.match('extra_study')) {
+    page = 'quiz';
+  }
   if (document.location.href.match('vocabulary|radicals|kanji')) {
     page = 'entry';
   }
