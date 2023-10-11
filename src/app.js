@@ -1,7 +1,7 @@
 import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
-import { initializeSettings, getSettings, isLightningOn, isSudachiOn } from './settings.js';
+import { initializeSettings, getSettings, isLightningOn } from './settings.js';
 import { createTranscriptContainer, logTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
