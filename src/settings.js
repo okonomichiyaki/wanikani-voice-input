@@ -1,5 +1,13 @@
 const gold = '#ffd700';
 const black = '#000000';
+const defaults = {
+  lightning: false,
+  transcript: true,
+  transcript_background: gold,
+  transcript_foreground: black,
+  transcript_position: "top",
+  transcript_delay: 5
+};
 
 export function isLightningOn() {
   return getSettings().lightning;
@@ -9,14 +17,7 @@ export function getSettings() {
   if (unsafeWindow.wkof) {
     return unsafeWindow.wkof.settings['wanikani-voice-input'];
   }
-  return {
-    lightning: false,
-    transcript: true,
-    transcript_background: gold,
-    transcript_foreground: black,
-    transcript_position: "top",
-    transcript_delay: 5000
-  };
+  return defaults;
 }
 
 export function initializeSettings(wkof, onStart) {
@@ -36,7 +37,7 @@ export function initializeSettings(wkof, onStart) {
   }
 
   function loadSettings() {
-    return wkof.Settings.load('wanikani-voice-input');
+    return wkof.Settings.load('wanikani-voice-input', defaults);
   }
 
   function openSettings() {
