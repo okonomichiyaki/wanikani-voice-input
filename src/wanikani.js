@@ -1,3 +1,5 @@
+import { isKana } from 'wanakana';
+
 // standalone functions to interact with WaniKani web app
 
 const Selectors = {
@@ -168,7 +170,10 @@ export function getContext(allItems) {
     return null;
   }
   const prompt = getPrompt();
-  const category = getCategory();
+  var category = getCategory();
+  if (category === 'vocabulary' && isKana(prompt)) {
+    category = 'kana_vocabulary';
+  }
   const type = getType();
   const items = getItems(allItems, category, prompt);
   const readings = getReadingsFromItems(items);
