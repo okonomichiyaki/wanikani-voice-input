@@ -142,7 +142,7 @@ function startListener(items) {
       }
     } else {
       if (isLightningOn()) {
-        setTimeout(wk.clickInfo, getSettings().lightning_delay * 1000);
+        setTimeout(wk.clickInfo, getSettings().mistake_delay * 1000);
       }
     }
   });

@@ -26,6 +26,13 @@ const config = {
       min: 0,
       default: 0.1
     },
+    mistake_delay: {
+      type: 'number',
+      label: 'Mistake delay',
+      hover_tip: 'Duration in seconds before lightning mode displays info on mistake',
+      min: 0,
+      default: 0.1
+    },
     transcript: {
       type: 'checkbox',
       label: 'Live transcript',
