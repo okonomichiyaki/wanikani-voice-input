@@ -185,6 +185,14 @@ export function getContext(allItems) {
   return { page, prompt, category, type, meanings, readings, items };
 }
 
+export function didContextChange(oldContext, newContext) {
+  const newPrompt = newContext && newContext.prompt;
+  const oldPrompt = oldContext && oldContext.prompt;
+  const newType = newContext && newContext.type;
+  const oldType = oldContext && oldContext.type;
+  return newPrompt !== oldPrompt || newType !== oldType;
+}
+
 // looks up user synonym by (wanikani subject) id
 export function getUserSynonyms(id) {
   const script = document.querySelector(Selectors.Synonyms);

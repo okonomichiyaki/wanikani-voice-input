@@ -2,7 +2,7 @@ import {checkAnswer} from './flashcards.js';
 import {createRecognition, setLanguage} from './recognition.js';
 import * as wk from './wanikani.js';
 import { initializeSettings, getSettings, isLightningOn } from './settings.js';
-import { createTranscriptContainer, logTranscript } from './live_transcript.js';
+import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
 
 import { ToHiragana } from './candidates/to_hiragana.js';
@@ -68,7 +68,7 @@ function startListener(items) {
   const dictionary = loadDictionary();
 
   let state = "Ready";
-  let previous = wk.getContext(items);
+  let context = wk.getContext(items);
   let result = null;
 
   function setState(newState) {
@@ -123,12 +123,32 @@ function startListener(items) {
     if (outcome.command) {
       outcome.command();
     }
+
+    // clear transcript if enabled, after utterance is over:
+    const newContext = wk.getContext(items);
+    if (final && wk.didContextChange(context, newContext)) {
+      context = newContext;
+      if (getSettings().transcript_clear) {
+        clearTranscript();
+      }
+    }
   });
 
   // watch to trigger language change on next card:
   function mutationCallback(mutations, observer) {
     const lang = wk.getLanguage();
     setLanguage(recognition, lang);
+
+    // clear transcript if enabled, for manual input:
+    if (state === 'Ready') {
+      const newContext = wk.getContext(items);
+      if (wk.didContextChange(context, newContext)) {
+        context = newContext;
+        if (getSettings().transcript_clear) {
+          clearTranscript();
+        }
+      }
+    }
   }
   const config = { attributes: true, childList: true, subtree: true };
   const observer = new MutationObserver(mutationCallback);

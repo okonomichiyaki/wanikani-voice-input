@@ -74,6 +74,12 @@ const config = {
       hover_tip: 'How many live transcripts to show (recommend setting position to bottom if this is more then 1)',
       min: 1,
       default: 1
+    },
+    transcript_clear: {
+      type: 'checkbox',
+      label: 'Clear transcript between flashcards',
+      default: false,
+      hover_tip: 'If enabled, clears the live transcript between flashcards'
     }
   }
 };

@@ -24,6 +24,11 @@ export function createTranscriptContainer(settings) {
 
 let COUNTER = 1;
 
+export function clearTranscript() {
+  const container = document.querySelector('div#wanikani-voice-input-transcript-container');
+  container.textContent = '';
+}
+
 function clearTranscriptWith(id) {
   const t = document.getElementById(id);
   if (t) {
