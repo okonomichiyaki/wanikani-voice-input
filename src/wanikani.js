@@ -133,7 +133,7 @@ function getItems(allItems, category, slug) {
     const type_index = wkof.ItemData.get_index(allItems, 'item_type');
     const index = type_index[category];
     if (index) {
-      items.push(...index.filter(i => i.data.characters === slug));
+      items.push(...index.filter(i => i.data.slug === slug || i.data.characters === slug));
     }
   }
   return items;
