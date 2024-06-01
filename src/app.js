@@ -7,6 +7,7 @@ import { loadDictionary } from './dict.js';
 
 import { ToHiragana } from './candidates/to_hiragana.js';
 import { BasicDictionary } from './candidates/basic_dictionary.js';
+import { SplitDictionary } from './candidates/split_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
 import { RepeatingSubstring } from './candidates/repeating.js';
 import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
@@ -103,6 +104,7 @@ function startListener(items) {
   const transformers = [
     new ToHiragana(),
     new BasicDictionary(dictionary),
+    new SplitDictionary(dictionary),
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new MultipleWords(dictionary),
