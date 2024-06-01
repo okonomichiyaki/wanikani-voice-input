@@ -84,9 +84,12 @@ function readingMatches(candidate, readings) {
 }
 
 function normalize(s) {
-  // TODO remove punctuation
+  // TODO remove punctuation? currently relying on levenshtein for that
   const n = s.toLowerCase().replaceAll(' ', '');
-  return toHiragana(n);
+  if (isJapanese(n)) {
+    return toHiragana(n);
+  }
+  return n;
 }
 
 function meaningMatches(candidate, meanings) {
@@ -111,6 +114,7 @@ function error(message) {
 
 function incorrect(context, candidates) {
   return {
+    success: false,
     error: false,
     message: "incorrect answer",
     meanings: context.meanings,

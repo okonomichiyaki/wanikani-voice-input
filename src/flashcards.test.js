@@ -45,3 +45,23 @@ test('do not return reading when context is for english', () => {
   expect(result.success).toBe(true);
   expect(result.answer).toBe('sendai');
 });
+
+
+test('levenshtein distance for punctuation', () => {
+  const context = {
+    meanings: ['Cold Hearted'],
+    readings: ['はくじょう'],
+    prompt: '薄情',
+    category: 'vocabulary',
+    type: 'meaning'
+  };
+  const dictionary = {};
+  const transformers = [
+    new ToHiragana(),
+    new BasicDictionary(dictionary),
+  ];
+  const raw = 'cold-hearted';
+  const result = checkAnswer(context, transformers, raw);
+  expect(result.success).toBe(true);
+  expect(result.answer).toBe('Cold Hearted');
+});
