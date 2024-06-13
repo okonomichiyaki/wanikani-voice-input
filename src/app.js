@@ -33,15 +33,15 @@ function handleSpeechRecognition(items, transformers, state, commands, raw, fina
   let answer = null;
   let command = null;
   let lightning = false;
-  let transcript = raw;
+  let transcript = {raw};
 
   if (state === "Ready") {
     const context = wk.getContext(items);
 
     const result = checkAnswer(context, transformers, raw);
     console.log('[wanikani-voice-input]', raw, result, context);
-    if (result.candidate && transcript !== result.candidate.data) {
-      transcript = transcript + ` (${result.candidate.data})`;
+    if (result.candidate && transcript.raw !== result.candidate.data) {
+      transcript.matched = result.candidate.data;
     }
     if (result.success) {
       if (final) {
@@ -115,7 +115,7 @@ function startListener(items) {
 
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function(raw, final) {
-    logTranscript(getSettings(), raw);
+    logTranscript(getSettings(), {raw});
     let outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
     logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {

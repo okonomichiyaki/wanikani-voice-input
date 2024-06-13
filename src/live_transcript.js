@@ -43,26 +43,32 @@ function clearTranscriptFn(id) {
   };
 }
 
-export function logTranscript(settings, text) {
+export function logTranscript(settings, transcript) {
   if (!settings.transcript) {
     return;
   }
-  const newText = '🎤' + text;
   const previous = document.getElementById(`transcript-${COUNTER - 1}`);
-  if (previous && newText === previous.textContent) {
+
+  // handle overwriting (or not) previous transcript without (or with) match:
+  if (previous && transcript.raw === previous.raw && !transcript.matched) {
     return;
   }
+  if (previous && transcript.raw === previous.raw && transcript.matched) {
+    clearTranscriptWith(`transcript-${COUNTER - 1}`);
+  }
 
+  const newText = '🎤' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
   const current = COUNTER++;
   const id = `transcript-${current}`;
-  const transcript = document.createElement('p');
-  transcript.id = id;
-  transcript.style = getTranscriptStyle(settings);
-  transcript.textContent = newText;
+  const el = document.createElement('p');
+  el.raw = transcript.raw;
+  el.id = id;
+  el.style = getTranscriptStyle(settings);
+  el.textContent = newText;
 
   const container = document.querySelector('div#wanikani-voice-input-transcript-container');
   container.style = getContainerStyle(settings);
-  container.appendChild(transcript);
+  container.appendChild(el);
 
   // eventually fade new transcript:
   setTimeout(clearTranscriptFn(id), settings.transcript_delay * 1000);
