@@ -6,6 +6,7 @@ import { createTranscriptContainer, logTranscript, clearTranscript } from './liv
 import { loadDictionary } from './dict.js';
 
 import { ToHiragana } from './candidates/to_hiragana.js';
+import { ConvertWo } from './candidates/convert_wo.js';
 import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { SplitDictionary } from './candidates/split_dictionary.js';
 import { SuruVerbs } from './candidates/suru_verbs.js';
@@ -103,6 +104,7 @@ function startListener(items) {
 
   const transformers = [
     new ToHiragana(),
+    new ConvertWo(),
     new BasicDictionary(dictionary),
     new SplitDictionary(dictionary),
     new SuruVerbs(dictionary),
