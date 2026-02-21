@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   test: {
-    include: ['src/**/*.test.js'],
+    include: ['src/**/*.test.{js,ts}'],
   },
   build: {
     lib: {
