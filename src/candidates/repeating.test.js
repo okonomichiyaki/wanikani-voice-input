@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { findRepeatingSubstring } from './repeating.js';
 
 test('find repeating substring of length 2 x 1', () => {

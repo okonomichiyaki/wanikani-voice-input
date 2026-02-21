@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 
 export default defineConfig({
+  test: {
+    include: ['src/**/*.test.js'],
+  },
   build: {
     lib: {
       entry: 'src/app.js',

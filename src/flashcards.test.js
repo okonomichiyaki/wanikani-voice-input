@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { ToHiragana } from './candidates/to_hiragana.js';
 import { BasicDictionary } from './candidates/basic_dictionary.js';
 import { checkAnswer } from './flashcards.js';

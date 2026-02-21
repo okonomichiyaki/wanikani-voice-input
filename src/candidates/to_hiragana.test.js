@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { ToHiragana } from './to_hiragana.js';
 
 const toh = new ToHiragana();

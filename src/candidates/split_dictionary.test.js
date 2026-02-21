@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { SplitDictionary } from './split_dictionary.js';
 
 const dictionary = {

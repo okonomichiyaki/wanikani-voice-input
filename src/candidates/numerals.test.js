@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { Numerals } from './numerals.js';
 
 const numerals = new Numerals();

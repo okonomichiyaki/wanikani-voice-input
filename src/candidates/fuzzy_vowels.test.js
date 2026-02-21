@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { FuzzyVowels } from './fuzzy_vowels.js';
 
 const fuzzy = new FuzzyVowels();

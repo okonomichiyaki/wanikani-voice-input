@@ -1,3 +1,4 @@
+import { test, expect } from 'vitest';
 import { ConvertWo } from './convert_wo.js';
 
 const cw = new ConvertWo();

@@ -1,3 +1,5 @@
+import { test, expect } from 'vitest';
+
 // extracted from jmdict:
 const dictionary = {
   "南極": [
