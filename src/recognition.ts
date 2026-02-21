@@ -1,3 +1,16 @@
+// Keep a persistent mic stream so macOS doesn't flicker the mic indicator
+// every time SpeechRecognition internally stops/restarts.
+let persistentStream: MediaStream | null = null;
+
+export async function acquireMicStream(): Promise<void> {
+  if (persistentStream) return;
+  try {
+    persistentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    console.error('[wanikani-voice-input] failed to acquire persistent mic stream:', e);
+  }
+}
+
 export function createRecognition(lang: string, callback: (transcript: string, isFinal: boolean) => void): SpeechRecognition | null {
   if (!('webkitSpeechRecognition' in window)) {
     console.error('[wanikani-voice-input] web speech not supported by this browser!');

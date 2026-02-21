@@ -1,5 +1,5 @@
 import { checkAnswer } from './flashcards';
-import { createRecognition, setLanguage } from './recognition';
+import { createRecognition, setLanguage, acquireMicStream } from './recognition';
 import * as wk from './wanikani';
 import { initializeSettings, getSettings, isLightningOn } from './settings';
 import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript';
@@ -83,7 +83,7 @@ function handleSpeechRecognition(items: WKOFData, transformers: Transformer[], s
   return { newState, transcript, answer, command, lightning };
 }
 
-function startListener(items: WKOFData): void {
+async function startListener(items: WKOFData): Promise<void> {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
@@ -191,6 +191,7 @@ function startListener(items: WKOFData): void {
   });
 
   if (recognition) {
+    await acquireMicStream();
     recognition.start();
   }
   state = "Ready";
