@@ -6,7 +6,7 @@ Userscript for WaniKani to enable reviews and lessons via voice input using WebS
 
 release checklist:
 
-1. build `rm dist/app*; yarn parcel build`
+1. build `rm dist/app*; yarn build`
 2. test: reviews, lessons, extra study, recent mistakes
 3. find and replace tag in userscript:
 `OLD=$(grep version dist/wanikani-voice-input.user.js | grep -o "[[:digit:]\.]\+")`

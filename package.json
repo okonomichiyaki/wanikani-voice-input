@@ -1,10 +1,9 @@
 {
   "license": "MIT",
-  "source": "src/app.js",
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.22.5",
     "jest": "^29.5.0",
-    "parcel": "^2.8.3"
+    "vite": "^6"
   },
   "dependencies": {
     "js-levenshtein": "^1.1.6",
@@ -13,6 +12,7 @@
     "wanakana": "^5.1.0"
   },
   "scripts": {
+    "build": "vite build",
     "test": "jest"
   },
   "babel": {
