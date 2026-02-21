@@ -1,4 +1,6 @@
-export function findRepeatingSubstring(s) {
+import { Candidate } from './types';
+
+export function findRepeatingSubstring(s: string): string | null {
   let len = s.length;
   for (let i = Math.floor(len / 2); i > 0; i--) {
     if (len % i === 0) {
@@ -17,11 +19,13 @@ export function findRepeatingSubstring(s) {
 }
 
 export class RepeatingSubstring {
+  order: number;
+
   constructor() {
     this.order = 1;
   }
-  getCandidates(raw) {
-    const candidates = [];
+  getCandidates(raw: string): Candidate[] {
+    const candidates: Candidate[] = [];
     const substr = findRepeatingSubstring(raw);
     if (substr) {
       candidates.push({type: "repeating", data: substr});

@@ -1,10 +1,10 @@
 import { test, expect } from 'vitest';
-import { ToHiragana } from './to_hiragana.js';
+import { ToHiragana } from './to_hiragana';
 
 const toh = new ToHiragana();
 
 
-function getCandidates(raw) {
+function getCandidates(raw: string) {
   return toh.getCandidates(raw).map(c => c.data).sort();
 }
 

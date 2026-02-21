@@ -1,7 +1,8 @@
 import { toHiragana, isJapanese } from 'wanakana';
+import { Candidate, Dictionary, DictionaryEntry } from './types';
 
 // TODO: create dictionary class and move this there
-function lookup(dictionary, s) {
+function lookup(dictionary: Dictionary, s: string): DictionaryEntry[] {
   const result = dictionary[s];
   if (result) {
     return result;
@@ -9,10 +10,10 @@ function lookup(dictionary, s) {
   return [];
 }
 
-function getReadings(entries) {
+function getReadings(entries: DictionaryEntry[]): string[] {
   return entries.flatMap(entry => {
     if (entry.type === 'word') {
-      return entry['kana'].map(toHiragana);
+      return entry['kana'].map(k => toHiragana(k));
     }
     if (entry.type === 'character') {
       return entry.readings.map(r => {
@@ -28,12 +29,15 @@ function getReadings(entries) {
 }
 
 export class MultipleWords {
-  constructor(dictionary) {
+  order: number;
+  dictionary: Dictionary;
+
+  constructor(dictionary: Dictionary) {
     this.order = 0;
     this.dictionary = dictionary;
   }
 
-  getCandidates(raw) {
+  getCandidates(raw: string | null): Candidate[] {
     if (!raw || raw.length === 0) {
       return [];
     }
@@ -41,7 +45,7 @@ export class MultipleWords {
     if (!isJapanese(nospaces)) {
       return [];
     }
-    const candidates = [];
+    const candidates: Candidate[] = [];
     if (raw.includes(' ')) {
       const parts = raw.split(' ').filter(x => x.length > 0);
       const readings = parts.map(part => {

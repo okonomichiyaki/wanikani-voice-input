@@ -1,9 +1,9 @@
 import { test, expect } from 'vitest';
-import { Numerals } from './numerals.js';
+import { Numerals } from './numerals';
 
 const numerals = new Numerals();
 
-function getCandidates(raw) {
+function getCandidates(raw: string) {
   return numerals.getCandidates(raw).map(c => c.data).sort();
 }
 

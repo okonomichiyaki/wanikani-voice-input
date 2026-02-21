@@ -1,7 +1,8 @@
 import { test, expect } from 'vitest';
-import { SplitDictionary } from './split_dictionary.js';
+import { SplitDictionary } from './split_dictionary';
+import { Dictionary } from './types';
 
-const dictionary = {
+const dictionary: Dictionary = {
   "僕": [
     {
       "id": "999",

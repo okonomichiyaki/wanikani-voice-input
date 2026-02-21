@@ -1,7 +1,8 @@
 import { test, expect } from 'vitest';
+import { Dictionary } from './types';
 
 // extracted from jmdict:
-const dictionary = {
+const dictionary: Dictionary = {
   "南極": [
     {
       "id": "1460180",
@@ -29,11 +30,11 @@ const dictionary = {
   ]
 };
 
-import { MultipleWords } from './multiple.js';
+import { MultipleWords } from './multiple';
 
 const multiple = new MultipleWords(dictionary);
 
-function getCandidates(raw) {
+function getCandidates(raw: string | null) {
   return multiple.getCandidates(raw).map(c => c.data).sort();
 }
 

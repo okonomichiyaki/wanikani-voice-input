@@ -1,9 +1,9 @@
 import { test, expect } from 'vitest';
-import { FuzzyVowels } from './fuzzy_vowels.js';
+import { FuzzyVowels } from './fuzzy_vowels';
 
 const fuzzy = new FuzzyVowels();
 
-function getCandidates(raw) {
+function getCandidates(raw: string) {
   return fuzzy.getCandidates(raw).map(c => c.data).sort();
 }
 

@@ -1,8 +1,9 @@
 import { toHiragana, isKana, isKanji } from 'wanakana';
-import { BasicDictionary } from './basic_dictionary.js';
+import { BasicDictionary } from './basic_dictionary';
+import { Candidate, Dictionary } from './types';
 
-function takeWhile(xs, f) {
-  const result = [];
+function takeWhile(xs: string[], f: (x: string) => boolean): string[] {
+  const result: string[] = [];
   for (let x of xs) {
     if (f(x)) {
       result.push(x);
@@ -13,7 +14,7 @@ function takeWhile(xs, f) {
   return result;
 }
 
-function dropWhile(xs, f) {
+function dropWhile(xs: string[], f: (x: string) => boolean): string[] {
   let i = 0;
   while (f(xs[i])) {
     i++;
@@ -24,13 +25,16 @@ function dropWhile(xs, f) {
 
 
 export class SplitDictionary {
-  constructor(dictionary) {
+  order: number;
+  basicDictionary: BasicDictionary;
+
+  constructor(dictionary: Dictionary) {
     this.order = 0;
     this.basicDictionary = new BasicDictionary(dictionary);
   }
 
-  getCandidates(raw) {
-    const candidates = [];
+  getCandidates(raw: string): Candidate[] {
+    const candidates: Candidate[] = [];
 
     const chars = raw.split('');
     const kanaPre = takeWhile(chars, isKana).join('');

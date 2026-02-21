@@ -1,6 +1,7 @@
 import { isJapanese } from 'wanakana';
+import { Candidate } from './types';
 
-const mapping = (function() {
+const mapping: Record<string, string[]> = (function() {
   const gojuon = ['あ','い','う','え','い','お','う',
                   'か','き','く','け','け','こ','こ',
                   'が','ぎ','ぐ','げ','げ','ご','ご',
@@ -17,12 +18,12 @@ const mapping = (function() {
                   'ら','り','る','れ','れ','ろ','ろ',
                   'わ','ゐ','wu','ゑ','ゑ','を','を'];
   const chunkSize = 7;
-  const chunks = [];
+  const chunks: string[][] = [];
   for (let i = 0; i < gojuon.length; i += chunkSize) {
     const chunk = gojuon.slice(i, i + chunkSize);
     chunks.push(chunk);
   }
-  const mapping = {};
+  const mapping: Record<string, string[]> = {};
   for (let i = 0; i < chunks.length; i++) {
     const chunk = chunks[i];
     for (let j = 0; j < chunkSize; j++) {
@@ -35,20 +36,20 @@ const mapping = (function() {
   return mapping;
 })();
 
-function removeCharAt(s, i) {
+function removeCharAt(s: string, i: number): string {
   var tmp = s.split('');
   tmp.splice(i, 1);
   return tmp.join('');
-};
+}
 
-function insert(s, i, t) {
+function insert(s: string, i: number, t: string): string {
   if (i > 0) {
     return s.substring(0, i) + t + s.substring(i, s.length);
   }
   return t + s;
-};
+}
 
-function matchingVowel(c, v) {
+function matchingVowel(c: string, v: string): boolean {
   const vowels = mapping[c];
   if (vowels) {
     return vowels.some(x => v === x);
@@ -57,26 +58,28 @@ function matchingVowel(c, v) {
 }
 
 export class FuzzyVowels {
+  order: number;
+
   constructor() {
     this.order = 1;
   }
-  getCandidates(raw) {
+  getCandidates(raw: string): Candidate[] {
     if (!isJapanese(raw)) {
       return [];
     }
 
-    const candidates = [];
+    const candidates: Candidate[] = [];
     for (let i = 0; i < raw.length; i++) {
       const c = raw.charAt(i);
       const n = raw.charAt(i+1);
       if (matchingVowel(c, n)) {
-        const candidate = {type: 'fuzzy', data: removeCharAt(raw, i+1)};
+        const candidate: Candidate = {type: 'fuzzy', data: removeCharAt(raw, i+1)};
         candidates.push(candidate);
       } else {
         const vowels = mapping[c] || [];
         for (const v of vowels) {
           if (v !== c) {
-            const candidate = {type: 'fuzzy', data: insert(raw, i+1, v)};
+            const candidate: Candidate = {type: 'fuzzy', data: insert(raw, i+1, v)};
             candidates.push(candidate);
           }
         }

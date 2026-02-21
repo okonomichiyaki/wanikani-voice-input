@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest';
-import { findRepeatingSubstring } from './repeating.js';
+import { findRepeatingSubstring } from './repeating';
 
 test('find repeating substring of length 2 x 1', () => {
   expect(findRepeatingSubstring('aa')).toBe('a');

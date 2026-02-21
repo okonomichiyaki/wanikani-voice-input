@@ -1,10 +1,10 @@
 import { test, expect } from 'vitest';
-import { ConvertWo } from './convert_wo.js';
+import { ConvertWo } from './convert_wo';
 
 const cw = new ConvertWo();
 
 
-function getCandidates(raw) {
+function getCandidates(raw: string) {
   return cw.getCandidates(raw).map(c => c.data);
 }
 
