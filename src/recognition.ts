@@ -1,6 +1,4 @@
-const MIN_INDICATE = 100;
-
-export function createRecognition(lang, callback) {
+export function createRecognition(lang: string, callback: (transcript: string, isFinal: boolean) => void): SpeechRecognition | null {
   if (!('webkitSpeechRecognition' in window)) {
     console.error('[wanikani-voice-input] web speech not supported by this browser!');
     return null;
@@ -12,8 +10,6 @@ export function createRecognition(lang, callback) {
   recognition.lang = lang;
 
   recognition.onresult = (event) => {
-    //console.info('[wanikani-voice-input] onresult', event);
-
     for (let i = event.resultIndex; i < event.results.length; ++i) {
       const transcript = event.results[i][0].transcript.trim();
       const final = event.results[i].isFinal;
@@ -35,7 +31,7 @@ export function createRecognition(lang, callback) {
   return recognition;
 }
 
-export function setLanguage(recognition, newLanguage) {
+export function setLanguage(recognition: SpeechRecognition, newLanguage: string): void {
   if (recognition.lang != newLanguage) {
     recognition.stop();
     recognition.lang = newLanguage;

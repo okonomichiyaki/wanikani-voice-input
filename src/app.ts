@@ -1,21 +1,36 @@
-import {checkAnswer} from './flashcards.js';
-import {createRecognition, setLanguage} from './recognition.js';
-import * as wk from './wanikani.js';
-import { initializeSettings, getSettings, isLightningOn } from './settings.js';
-import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript.js';
-import { loadDictionary } from './dict.js';
+import { checkAnswer } from './flashcards';
+import { createRecognition, setLanguage } from './recognition';
+import * as wk from './wanikani';
+import { initializeSettings, getSettings, isLightningOn } from './settings';
+import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript';
+import { loadDictionary } from './dict';
 
-import { ToHiragana } from './candidates/to_hiragana.js';
-import { ConvertWo } from './candidates/convert_wo.js';
-import { BasicDictionary } from './candidates/basic_dictionary.js';
-import { SplitDictionary } from './candidates/split_dictionary.js';
-import { SuruVerbs } from './candidates/suru_verbs.js';
-import { RepeatingSubstring } from './candidates/repeating.js';
-import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
-import { MultipleWords } from './candidates/multiple.js';
-import { Numerals } from './candidates/numerals.js';
+import { ToHiragana } from './candidates/to_hiragana';
+import { ConvertWo } from './candidates/convert_wo';
+import { BasicDictionary } from './candidates/basic_dictionary';
+import { SplitDictionary } from './candidates/split_dictionary';
+import { SuruVerbs } from './candidates/suru_verbs';
+import { RepeatingSubstring } from './candidates/repeating';
+import { FuzzyVowels } from './candidates/fuzzy_vowels';
+import { MultipleWords } from './candidates/multiple';
+import { Numerals } from './candidates/numerals';
+import { WKOFData, WKContext, Settings, Transcript, WKOF, CheckResult } from './types';
+import { Dictionary } from './candidates/types';
 
-function onStart(settings, items) {
+interface Transformer {
+  order: number;
+  getCandidates(raw: string): import('./candidates/types').Candidate[];
+}
+
+interface SpeechOutcome {
+  newState: string;
+  transcript: Transcript;
+  answer: string | null;
+  command: (() => void) | null;
+  lightning: boolean;
+}
+
+function onStart(settings: Settings | Promise<Settings>, items: WKOFData): void {
   const context = wk.getContext(items);
   if (!context) {
     return;
@@ -28,30 +43,33 @@ function onStart(settings, items) {
   }
 }
 
-function handleSpeechRecognition(items, transformers, state, commands, raw, final) {
+function handleSpeechRecognition(items: WKOFData, transformers: Transformer[], state: string, commands: Record<string, () => void>, raw: string, final: boolean): SpeechOutcome {
   let newState = state;
-  let answer = null;
-  let command = null;
+  let answer: string | null = null;
+  let command: (() => void) | null = null;
   let lightning = false;
-  let transcript = {raw};
+  let transcript: Transcript = {raw};
 
   if (state === "Ready") {
     const context = wk.getContext(items);
+    if (!context) {
+      return { newState, transcript, answer, command, lightning };
+    }
 
     const result = checkAnswer(context, transformers, raw);
     console.log('[wanikani-voice-input]', raw, result, context);
-    if (result.candidate && transcript.raw !== result.candidate.data) {
+    if ('candidate' in result && result.candidate && transcript.raw !== result.candidate.data) {
       transcript.matched = result.candidate.data;
     }
-    if (result.success) {
+    if ('success' in result && result.success) {
       if (final) {
-        answer = result.answer;
+        answer = (result as { answer: string }).answer;
       } else {
         newState = "Waiting";
-        answer = result.answer;
+        answer = (result as { answer: string }).answer;
       }
     } else if (result.error) {
-      transcript = "!! " + result.message + " !!";
+      transcript = { raw: "!! " + result.message + " !!" };
     }
   }
   if (state === "Waiting" && final) {
@@ -65,25 +83,24 @@ function handleSpeechRecognition(items, transformers, state, commands, raw, fina
   return { newState, transcript, answer, command, lightning };
 }
 
-function startListener(items) {
+function startListener(items: WKOFData): void {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
   let state = "Ready";
   let context = wk.getContext(items);
-  let result = null;
+  let result: CheckResult | null = null;
 
-  function setState(newState) {
-    //console.log(`[wanikani-voice-input] >> ${newState}`);
+  function setState(newState: string): void {
     state = newState;
   }
 
-  function next() {
+  function next(): void {
     wk.clickNext();
     setState("Ready");
   }
 
-  const commands = {
+  const commands: Record<string, () => void> = {
     'wrong': wk.markWrong,
     'incorrect': wk.markWrong,
     'mistake': wk.markWrong,
@@ -102,7 +119,7 @@ function startListener(items) {
     'ネクスト': next,
   };
 
-  const transformers = [
+  const transformers: Transformer[] = [
     new ToHiragana(),
     new ConvertWo(),
     new BasicDictionary(dictionary),
@@ -114,7 +131,7 @@ function startListener(items) {
   ];
 
   const lang = wk.getLanguage();
-  const recognition = createRecognition(lang, function(raw, final) {
+  const recognition = createRecognition(lang, function(raw: string, final: boolean) {
     logTranscript(getSettings(), {raw});
     let outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
     logTranscript(getSettings(), outcome.transcript);
@@ -139,9 +156,11 @@ function startListener(items) {
   });
 
   // watch to trigger language change on next card:
-  function mutationCallback(mutations, observer) {
+  function mutationCallback(mutations: MutationRecord[], observer: MutationObserver): void {
     const lang = wk.getLanguage();
-    setLanguage(recognition, lang);
+    if (recognition) {
+      setLanguage(recognition, lang);
+    }
 
     // clear transcript if enabled, for manual input:
     if (state === 'Ready') {
@@ -154,28 +173,30 @@ function startListener(items) {
       }
     }
   }
-  const config = { attributes: true, childList: true, subtree: true };
+  const config: MutationObserverInit = { attributes: true, childList: true, subtree: true };
   const observer = new MutationObserver(mutationCallback);
   observer.observe(document.body, config);
 
   // lightning mode and auto show info on wrong:
-  window.addEventListener("didAnswerQuestion", function(e) {
+  window.addEventListener("didAnswerQuestion", function(e: Event) {
     if (wk.didAnswerCorrectly(e)) {
       if (isLightningOn()) {
         setTimeout(wk.clickNext, getSettings().lightning_delay * 1000);
       }
     } else {
       if (isLightningOn()) {
-        setTimeout(wk.clickInfo, getSettings().mistake_delay * 1000);
+        setTimeout(wk.clickInfo, getSettings().mistake_delay! * 1000);
       }
     }
   });
 
-  recognition.start();
+  if (recognition) {
+    recognition.start();
+  }
   state = "Ready";
-};
+}
 
-async function loadWkof(wkof) {
+async function loadWkof(wkof: WKOF): Promise<void> {
   wkof.include('Menu,Settings,ItemData');
   await wkof.ready('Menu,Settings,ItemData');
   const settings = initializeSettings(wkof);
@@ -184,7 +205,6 @@ async function loadWkof(wkof) {
 }
 
 if (unsafeWindow.wkof) {
-  const wkof = unsafeWindow.wkof;
   loadWkof(unsafeWindow.wkof);
 } else {
   const script = 'Voice Input';

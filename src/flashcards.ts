@@ -1,9 +1,16 @@
-import * as wk from './wanikani.js';
-import { clickSelector } from './util.js';
+import * as wk from './wanikani';
+import { clickSelector } from './util';
 import { toHiragana, isJapanese, isKanji } from 'wanakana';
 import levenshtein from 'js-levenshtein';
+import { Candidate } from './candidates/types';
+import { WKContext, CheckResult } from './types';
 
-const homonyms = {
+interface Transformer {
+  order: number;
+  getCandidates(raw: string): Candidate[];
+}
+
+const homonyms: Record<string, string> = {
   'b': 'び',
   'ezone': 'いぞん',
   'gt': 'じき',
@@ -62,18 +69,18 @@ const homonyms = {
   '性感': 'せいかん'
 };
 
-function literalMatches(candidate, prompt) {
+function literalMatches(candidate: Candidate, prompt: string | null): string | null {
   if (!isJapanese(candidate.data)) {
     return null;
   }
   const data = candidate.data;
-  if (normalize(data) === normalize(prompt)) {
+  if (prompt && normalize(data) === normalize(prompt)) {
     return prompt;
   }
   return null;
 }
 
-function readingMatches(candidate, readings) {
+function readingMatches(candidate: Candidate, readings: string[]): string | null {
   const data = candidate.data;
   for (const r of readings) {
     if (r === data || r === homonyms[data.toLowerCase()]) {
@@ -83,7 +90,7 @@ function readingMatches(candidate, readings) {
   return null;
 }
 
-function normalize(s) {
+function normalize(s: string): string {
   // TODO remove punctuation? currently relying on levenshtein for that
   const n = s.toLowerCase().replaceAll(' ', '');
   if (isJapanese(n)) {
@@ -92,7 +99,7 @@ function normalize(s) {
   return n;
 }
 
-function meaningMatches(candidate, meanings) {
+function meaningMatches(candidate: Candidate, meanings: string[]): string | null {
   const data = candidate.data;
   for (const m of meanings) {
     if (normalize(m) === normalize(data)) {
@@ -105,14 +112,14 @@ function meaningMatches(candidate, meanings) {
   return null;
 }
 
-function error(message) {
+function error(message: string): CheckResult {
   return {
     error: true,
     message: message
   };
 }
 
-function incorrect(context, candidates) {
+function incorrect(context: WKContext, candidates: Candidate[]): CheckResult {
   return {
     success: false,
     error: false,
@@ -123,7 +130,7 @@ function incorrect(context, candidates) {
   };
 }
 
-function success(context, candidates, candidate, answer) {
+function success(context: WKContext, candidates: Candidate[], candidate: Candidate, answer: string): CheckResult {
   return {
     success: true,
     message: "correct answer",
@@ -135,17 +142,18 @@ function success(context, candidates, candidate, answer) {
   };
 }
 
-function groupBy(xs, k) {
-  return xs.reduce(function(rv, x) {
-    (rv[x[k]] = rv[x[k]] || []).push(x);
+function groupBy<T>(xs: T[], k: keyof T): Record<string, T[]> {
+  return xs.reduce(function(rv: Record<string, T[]>, x: T) {
+    const key = String(x[k]);
+    (rv[key] = rv[key] || []).push(x);
     return rv;
   }, {});
 }
 
-export function checkAnswer(context, transformers, raw) {
+export function checkAnswer(context: WKContext, transformers: Transformer[], raw: string): CheckResult {
   const { meanings, readings, prompt } = context;
 
-  let candidates = [];
+  let candidates: Candidate[] = [];
   candidates.push({type: "raw", data: raw});
 
   const byOrder = groupBy(transformers, 'order');
@@ -155,7 +163,7 @@ export function checkAnswer(context, transformers, raw) {
   // output from transformers at one level are additional inputs for later levels
   for (const key of keys) {
     const ts = byOrder[key];
-    const newCandidates = [];
+    const newCandidates: Candidate[] = [];
     for (const t of ts) {
       for (const c of candidates) {
         newCandidates.push(...t.getCandidates(c.data));

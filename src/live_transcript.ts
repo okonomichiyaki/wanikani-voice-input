@@ -1,4 +1,6 @@
-function getContainerStyle(settings) {
+import { Settings, Transcript } from './types';
+
+function getContainerStyle(settings: Settings): string {
   let position = settings.transcript_position;
   let style = 'width: 100%; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;';
   if (position === 'top' || position === 'bottom') {
@@ -9,45 +11,49 @@ function getContainerStyle(settings) {
   return style;
 }
 
-function getTranscriptStyle(settings) {
+function getTranscriptStyle(settings: Settings): string {
   let fgcolor = settings.transcript_foreground;
   let bgcolor = settings.transcript_background;
   return `color: ${fgcolor}; background-color: ${bgcolor}; font-size: 5vh; pointer-events: auto;`;
 }
 
-export function createTranscriptContainer(settings) {
+export function createTranscriptContainer(settings: Settings): void {
   const container = document.createElement('div');
   container.id = 'wanikani-voice-input-transcript-container';
-  container.style = getContainerStyle(settings);
+  container.style.cssText = getContainerStyle(settings);
   document.body.appendChild(container);
 }
 
 let COUNTER = 1;
 
-export function clearTranscript() {
+export function clearTranscript(): void {
   const container = document.querySelector('div#wanikani-voice-input-transcript-container');
-  container.textContent = '';
-}
-
-function clearTranscriptWith(id) {
-  const t = document.getElementById(id);
-  if (t) {
-    const parent = t.parentElement;
-    parent.removeChild(t);
+  if (container) {
+    container.textContent = '';
   }
 }
 
-function clearTranscriptFn(id) {
+function clearTranscriptWith(id: string): void {
+  const t = document.getElementById(id);
+  if (t) {
+    const parent = t.parentElement;
+    if (parent) {
+      parent.removeChild(t);
+    }
+  }
+}
+
+function clearTranscriptFn(id: string): () => void {
   return function() {
     clearTranscriptWith(id);
   };
 }
 
-export function logTranscript(settings, transcript) {
+export function logTranscript(settings: Settings, transcript: Transcript): void {
   if (!settings.transcript) {
     return;
   }
-  const previous = document.getElementById(`transcript-${COUNTER - 1}`);
+  const previous = document.getElementById(`transcript-${COUNTER - 1}`) as (HTMLElement & { raw?: string }) | null;
 
   // handle overwriting (or not) previous transcript without (or with) match:
   if (previous && transcript.raw === previous.raw && !transcript.matched) {
@@ -57,17 +63,18 @@ export function logTranscript(settings, transcript) {
     clearTranscriptWith(`transcript-${COUNTER - 1}`);
   }
 
-  const newText = '🎤' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
+  const newText = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
   const current = COUNTER++;
   const id = `transcript-${current}`;
-  const el = document.createElement('p');
+  const el = document.createElement('p') as HTMLParagraphElement & { raw?: string };
   el.raw = transcript.raw;
   el.id = id;
-  el.style = getTranscriptStyle(settings);
+  el.style.cssText = getTranscriptStyle(settings);
   el.textContent = newText;
 
-  const container = document.querySelector('div#wanikani-voice-input-transcript-container');
-  container.style = getContainerStyle(settings);
+  const container = document.querySelector('div#wanikani-voice-input-transcript-container') as HTMLElement | null;
+  if (!container) return;
+  container.style.cssText = getContainerStyle(settings);
   container.appendChild(el);
 
   // eventually fade new transcript:

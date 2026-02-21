@@ -1,8 +1,9 @@
 import { isKana } from 'wanakana';
+import { WKContext, WKOFItem, WKOFItemMeaning, WKOFItemReading, WKOFData, WKOF } from './types';
 
 // standalone functions to interact with WaniKani web app
 
-const Selectors = {
+const Selectors: Record<string, string> = {
   EntryPrompt: 'span.page-header__icon.page-header__icon',
   Category: 'span.quiz-input__question-category',
   Type: 'span.quiz-input__question-type',
@@ -11,7 +12,7 @@ const Selectors = {
   Next: 'div.quiz-input__input-container button',
 };
 
-export function checkDom() {
+export function checkDom(): void {
   for (const selector of Object.keys(Selectors)) {
     const el = document.querySelector(Selectors[selector]);
     if (!el) {
@@ -21,10 +22,10 @@ export function checkDom() {
 }
 
 // returns `radical`, `kanji`, or `vocabulary`
-function getCategory() {
+function getCategory(): string | null {
   const category = document.querySelector(Selectors.Category);
   if (category) {
-    return category.textContent.trim().toLowerCase();
+    return category.textContent!.trim().toLowerCase();
   }
   if (document.location.href.match('vocabulary')) {
     return 'vocabulary';
@@ -39,10 +40,10 @@ function getCategory() {
 }
 
 // returns `name` (radical only), `meaning`, or `reading`
-function getType() {
+function getType(): string | null {
   const type = document.querySelector(Selectors.Type);
   if (type) {
-    return type.textContent.trim().toLowerCase();
+    return type.textContent!.trim().toLowerCase();
   }
   if (document.location.href.match('#reading')) {
     return 'reading';
@@ -62,7 +63,7 @@ function getType() {
   return null;
 }
 
-export function getLanguage() {
+export function getLanguage(): string {
   const t = getType();
   if (t === "meaning" || t === "name") {
     return 'en-US';
@@ -74,7 +75,7 @@ export function getLanguage() {
 }
 
 // returns flashcard "front" from single entry pages
-function getPromptFromEntry() {
+function getPromptFromEntry(): string | null {
   const el = document.querySelector(Selectors.EntryPrompt);
   if (!el) {
     return null;
@@ -87,14 +88,14 @@ function getPromptFromEntry() {
 }
 
 // returns flashcard "front" during quizzes
-export function getPrompt() {
+export function getPrompt(): string | null {
   const el = document.querySelector(Selectors.Prompt);
   if (!el) {
     return getPromptFromEntry();
   }
   let prompt = el.textContent; // kanji, vocab
-  if (prompt === '' && el.childNodes.length > 0 && el.childNodes[0].getAttribute('aria-label')) {
-    prompt = el.childNodes[0].getAttribute('aria-label').toLowerCase(); // radical
+  if (prompt === '' && el.childNodes.length > 0 && (el.childNodes[0] as Element).getAttribute('aria-label')) {
+    prompt = (el.childNodes[0] as Element).getAttribute('aria-label')!.toLowerCase(); // radical
   }
   if (prompt === '') {
     return null;
@@ -102,8 +103,8 @@ export function getPrompt() {
   return prompt;
 }
 
-function getMeaningsFromItems(items) {
-  const meanings = [];
+function getMeaningsFromItems(items: WKOFItem[]): string[] {
+  const meanings: WKOFItemMeaning[] = [];
   for (let item of items) {
     if (item && item.data && item.data.meanings) {
       meanings.push(...item.data.meanings.filter(m => m.accepted_answer));
@@ -115,8 +116,8 @@ function getMeaningsFromItems(items) {
   return meanings.map(m => m.meaning);
 }
 
-function getReadingsFromItems(items) {
-  const readings = [];
+function getReadingsFromItems(items: WKOFItem[]): string[] {
+  const readings: WKOFItemReading[] = [];
   for (let item of items) {
     if (item && item.data && item.data.readings) {
       readings.push(...item.data.readings.filter(r => r.accepted_answer));
@@ -126,12 +127,12 @@ function getReadingsFromItems(items) {
 }
 
 // flashcard "backs" for this card
-function getItems(allItems, category, slug) {
-  const items = [];
+function getItems(allItems: WKOFData, category: string | null, slug: string | null): WKOFItem[] {
+  const items: WKOFItem[] = [];
   if (unsafeWindow.wkof) {
-    const wkof = unsafeWindow.wkof;
+    const wkof: WKOF = unsafeWindow.wkof;
     const type_index = wkof.ItemData.get_index(allItems, 'item_type');
-    const index = type_index[category];
+    const index = type_index[category as string];
     if (index) {
       items.push(...index.filter(i => i.data.slug === slug || i.data.characters === slug));
     }
@@ -140,14 +141,14 @@ function getItems(allItems, category, slug) {
 }
 
 // returns unique flashcard context: prompt + category + type
-export function getContext(allItems) {
+export function getContext(allItems: WKOFData): WKContext | null {
   // extra study: https://www.wanikani.com/subjects/extra_study?queue_type=recent_lessons
   // main review: https://www.wanikani.com/subjects/review
   // lesson intro: https://www.wanikani.com/subjects/6259/lesson?queue=6259-6260-6261-6262-6263
   // lesson quiz: https://www.wanikani.com/subjects/lesson/quiz?queue=6259-6260-6261-6262-6263
   // entry: https://www.wanikani.com/(vocabulary|radicals|kanji)/*
 
-  let page = null;
+  let page: string | null = null;
   if (document.location.href.match('review')) {
     page = 'review';
   }
@@ -171,7 +172,7 @@ export function getContext(allItems) {
   }
   const prompt = getPrompt();
   var category = getCategory();
-  if (category === 'vocabulary' && isKana(prompt)) {
+  if (category === 'vocabulary' && prompt && isKana(prompt)) {
     category = 'kana_vocabulary';
   }
   const type = getType();
@@ -185,7 +186,7 @@ export function getContext(allItems) {
   return { page, prompt, category, type, meanings, readings, items };
 }
 
-export function didContextChange(oldContext, newContext) {
+export function didContextChange(oldContext: WKContext | null, newContext: WKContext | null): boolean {
   const newPrompt = newContext && newContext.prompt;
   const oldPrompt = oldContext && oldContext.prompt;
   const newType = newContext && newContext.type;
@@ -194,10 +195,10 @@ export function didContextChange(oldContext, newContext) {
 }
 
 // looks up user synonym by (wanikani subject) id
-export function getUserSynonyms(id) {
+export function getUserSynonyms(id: number): string[] {
   const script = document.querySelector(Selectors.Synonyms);
   if (script) {
-    const data = JSON.parse(script.textContent);
+    const data: Record<string, string[]> = JSON.parse(script.textContent!);
     if (data[id]) {
       return data[id];
     }
@@ -205,8 +206,8 @@ export function getUserSynonyms(id) {
   return [];
 }
 
-export function clickNext() {
-  const button = document.querySelector(Selectors.Next);
+export function clickNext(): boolean {
+  const button = document.querySelector(Selectors.Next) as HTMLElement | null;
   if (button) {
     button.click();
     return true;
@@ -214,25 +215,25 @@ export function clickNext() {
   return false;
 }
 
-export function markWrong() {
+export function markWrong(): void {
   const lang = getLanguage();
   const incorrect = lang === "en-US" ? "aaa" : "あああ";
   submitAnswer(incorrect);
 }
 
-export function inputAnswer(input) {
-  const userResponse = document.querySelector('#user-response');
+export function inputAnswer(input: string): void {
+  const userResponse = document.querySelector('#user-response') as HTMLInputElement | null;
   if (userResponse) {
     userResponse.value = input;
   }
 }
 
-export function submitAnswer(input) {
+export function submitAnswer(input: string): boolean {
   inputAnswer(input);
   return clickNext();
 }
 
-function isNotAlreadyOpen() {
+function isNotAlreadyOpen(): boolean {
   const info = document.getElementById('information');
   if (!info) {
     return true;
@@ -241,12 +242,12 @@ function isNotAlreadyOpen() {
   return !classes.some(c => c.toString().includes('open'));
 }
 
-export function clickInfo() {
+export function clickInfo(): void {
   const menuItems = document.querySelectorAll('#additional-content a');
   for (let item of menuItems) {
-    if (item.textContent.includes("Item Info")) {
+    if (item.textContent!.includes("Item Info")) {
       if (isNotAlreadyOpen()) {
-        item.click();
+        (item as HTMLElement).click();
       }
       return;
     }
@@ -254,13 +255,13 @@ export function clickInfo() {
 }
 
 /* inspects event from `didAnswerQuestion` and returns true if question passed */
-export function didAnswerCorrectly(e) {
-  if (typeof e.detail !== 'object' || typeof e.detail.results !== 'object') {
+export function didAnswerCorrectly(e: Event): boolean {
+  const detail = (e as CustomEvent).detail;
+  if (typeof detail !== 'object' || typeof detail.results !== 'object') {
     console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
     return false;
   }
-  const results = e.detail.results;
-  const detail = e.detail;
+  const results = detail.results;
   if (typeof results.action !== 'string') {
     console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
     return false;

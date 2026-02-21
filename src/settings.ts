@@ -1,13 +1,18 @@
+import { Settings, WKOF } from './types';
+
 const gold = '#ffd700';
 const black = '#000000';
-const defaults = {
+const defaults: Settings = {
   lightning: false,
   lightning_delay: 0.1,
+  mistake_delay: 0.1,
   transcript: true,
   transcript_background: gold,
   transcript_foreground: black,
   transcript_position: "top",
-  transcript_delay: 5
+  transcript_delay: 5,
+  transcript_count: 1,
+  transcript_clear: false
 };
 const config = {
   script_id: 'wanikani-voice-input',
@@ -84,18 +89,18 @@ const config = {
   }
 };
 
-export function isLightningOn() {
+export function isLightningOn(): boolean {
   return getSettings().lightning;
 }
 
-export function getSettings() {
+export function getSettings(): Settings {
   if (unsafeWindow.wkof) {
     return unsafeWindow.wkof.settings['wanikani-voice-input'];
   }
   return defaults;
 }
 
-export function initializeSettings(wkof) {
+export function initializeSettings(wkof: WKOF): Promise<Settings> {
   function openSettings() {
     var dialog = new wkof.Settings(config);
     dialog.open();

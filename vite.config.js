@@ -6,7 +6,7 @@ export default defineConfig({
   },
   build: {
     lib: {
-      entry: 'src/app.js',
+      entry: 'src/app.ts',
       formats: ['iife'],
       name: 'WanikaniVoiceInput',
       fileName: () => 'app.js',
