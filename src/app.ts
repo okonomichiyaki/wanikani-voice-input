@@ -43,14 +43,26 @@ function isRelevantPage(context: WKContext): boolean {
   return false;
 }
 
-function handleNavigation(items: WKOFData): void {
+async function handleNavigation(wkof: WKOF): Promise<void> {
+  wkof.include('ItemData');
+  await wkof.ready('ItemData');
+
+  const items = await wkof.ItemData.get_items();
   const context = wk.getContext(items);
 
   if (context && isRelevantPage(context) && !activeCleanup) {
+    console.log('[wanikani-voice-input]', 'found context and relevant page: starting listener');
+    wkof.include('Menu,Settings');
+    await wkof.ready('Menu,Settings');
+    await initializeSettings(wkof);
     startListener(items);
   } else if (!context && activeCleanup) {
+    console.log('[wanikani-voice-input]', 'no context and clean up: cleaning up');
     activeCleanup();
     activeCleanup = null;
+  } else {
+    console.log('[wanikani-voice-input]', 'no context and no clean up: doing nothing');
+
   }
 }
 
@@ -220,12 +232,8 @@ async function startListener(items: WKOFData): Promise<void> {
 }
 
 async function loadWkof(wkof: WKOF): Promise<void> {
-  wkof.include('Menu,Settings,ItemData');
-  await wkof.ready('Menu,Settings,ItemData');
-  const settings = initializeSettings(wkof);
-  const items = await wkof.ItemData.get_items();
-  handleNavigation(items);
-  onNavigationSuccess(() => handleNavigation(items));
+  await handleNavigation(wkof);
+  onNavigationSuccess(() => handleNavigation(wkof));
 }
 
 if (unsafeWindow.wkof) {
