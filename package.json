@@ -1,6 +1,7 @@
 {
   "license": "MIT",
   "devDependencies": {
+    "rollup-plugin-license": "^3.7.0",
     "typescript": "^5.9.3",
     "vite": "^6",
     "vitest": "^4.0.18"
