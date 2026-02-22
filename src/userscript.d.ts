@@ -2,7 +2,6 @@ declare function GM_getResourceText(name: string): string;
 
 declare const unsafeWindow: Window & {
   wkof?: import('./types').WKOF;
-  navigation?: EventTarget;
 };
 
 interface SpeechRecognitionEvent extends Event {

@@ -4,8 +4,6 @@ import * as wk from './wanikani';
 import { initializeSettings, getSettings, isLightningOn } from './settings';
 import { createTranscriptContainer, logTranscript, clearTranscript, removeTranscriptContainer } from './live_transcript';
 import { loadDictionary } from './dict';
-import { onNavigationSuccess } from './navigation';
-
 import { ToHiragana } from './candidates/to_hiragana';
 import { ConvertWo } from './candidates/convert_wo';
 import { BasicDictionary } from './candidates/basic_dictionary';
@@ -44,25 +42,23 @@ function isRelevantPage(context: WKContext): boolean {
 }
 
 async function handleNavigation(wkof: WKOF): Promise<void> {
+  if (activeCleanup) {
+    activeCleanup();
+    activeCleanup = null;
+  }
+
   wkof.include('ItemData');
   await wkof.ready('ItemData');
 
   const items = await wkof.ItemData.get_items();
   const context = wk.getContext(items);
 
-  if (context && isRelevantPage(context) && !activeCleanup) {
-    console.log('[wanikani-voice-input]', 'found context and relevant page: starting listener');
+  if (context && isRelevantPage(context)) {
+    console.log('[wanikani-voice-input]', 'initializing: ', context);
     wkof.include('Menu,Settings');
     await wkof.ready('Menu,Settings');
     await initializeSettings(wkof);
     startListener(items);
-  } else if (!context && activeCleanup) {
-    console.log('[wanikani-voice-input]', 'no context and clean up: cleaning up');
-    activeCleanup();
-    activeCleanup = null;
-  } else {
-    console.log('[wanikani-voice-input]', 'no context and no clean up: doing nothing');
-
   }
 }
 
@@ -221,6 +217,7 @@ async function startListener(items: WKOFData): Promise<void> {
   state = "Ready";
 
   activeCleanup = () => {
+    console.log('[wanikani-voice-input]', 'cleaning up');
     if (recognition) {
       stopRecognition(recognition);
     }
@@ -231,13 +228,9 @@ async function startListener(items: WKOFData): Promise<void> {
   };
 }
 
-async function loadWkof(wkof: WKOF): Promise<void> {
-  await handleNavigation(wkof);
-  onNavigationSuccess(() => handleNavigation(wkof));
-}
-
 if (unsafeWindow.wkof) {
-  loadWkof(unsafeWindow.wkof);
+  const wkof = unsafeWindow.wkof;
+  wkof.on_pageload(['/*'], () => handleNavigation(wkof));
 } else {
   const script = 'Voice Input';
   const msg = `${script} requires Wanikani Open Framework.\nDo you want to be forwarded to the installation instructions?`;

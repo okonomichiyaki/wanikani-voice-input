@@ -68,6 +68,7 @@ export interface WKOF {
     get_items(): Promise<WKOFData>;
     get_index(items: WKOFData, indexType: string): Record<string, WKOFItem[]>;
   };
+  on_pageload(patterns: string[], callback: (url: string) => void): void;
 }
 
 export interface Transcript {
