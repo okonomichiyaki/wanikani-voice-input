@@ -1,9 +1,10 @@
 import { checkAnswer } from './flashcards';
-import { createRecognition, setLanguage, acquireMicStream } from './recognition';
+import { createRecognition, setLanguage, acquireMicStream, stopRecognition, releaseMicStream } from './recognition';
 import * as wk from './wanikani';
 import { initializeSettings, getSettings, isLightningOn } from './settings';
-import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript';
+import { createTranscriptContainer, logTranscript, clearTranscript, removeTranscriptContainer } from './live_transcript';
 import { loadDictionary } from './dict';
+import { onNavigationSuccess } from './navigation';
 
 import { ToHiragana } from './candidates/to_hiragana';
 import { ConvertWo } from './candidates/convert_wo';
@@ -30,16 +31,26 @@ interface SpeechOutcome {
   lightning: boolean;
 }
 
-function onStart(settings: Settings | Promise<Settings>, items: WKOFData): void {
-  const context = wk.getContext(items);
-  if (!context) {
-    return;
-  }
+let activeCleanup: (() => void) | null = null;
+
+function isRelevantPage(context: WKContext): boolean {
   if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
-    startListener(items);
+    return true;
   }
   if (context.page === 'entry' && process.env.NODE_ENV !== 'production') {
+    return true;
+  }
+  return false;
+}
+
+function handleNavigation(items: WKOFData): void {
+  const context = wk.getContext(items);
+
+  if (context && isRelevantPage(context) && !activeCleanup) {
     startListener(items);
+  } else if (!context && activeCleanup) {
+    activeCleanup();
+    activeCleanup = null;
   }
 }
 
@@ -178,7 +189,7 @@ async function startListener(items: WKOFData): Promise<void> {
   observer.observe(document.body, config);
 
   // lightning mode and auto show info on wrong:
-  window.addEventListener("didAnswerQuestion", function(e: Event) {
+  function didAnswerQuestionHandler(e: Event): void {
     if (wk.didAnswerCorrectly(e)) {
       if (isLightningOn()) {
         setTimeout(wk.clickNext, getSettings().lightning_delay * 1000);
@@ -188,13 +199,24 @@ async function startListener(items: WKOFData): Promise<void> {
         setTimeout(wk.clickInfo, getSettings().mistake_delay! * 1000);
       }
     }
-  });
+  }
+  window.addEventListener("didAnswerQuestion", didAnswerQuestionHandler);
 
   if (recognition) {
     await acquireMicStream();
     recognition.start();
   }
   state = "Ready";
+
+  activeCleanup = () => {
+    if (recognition) {
+      stopRecognition(recognition);
+    }
+    releaseMicStream();
+    observer.disconnect();
+    window.removeEventListener("didAnswerQuestion", didAnswerQuestionHandler);
+    removeTranscriptContainer();
+  };
 }
 
 async function loadWkof(wkof: WKOF): Promise<void> {
@@ -202,7 +224,8 @@ async function loadWkof(wkof: WKOF): Promise<void> {
   await wkof.ready('Menu,Settings,ItemData');
   const settings = initializeSettings(wkof);
   const items = await wkof.ItemData.get_items();
-  onStart(settings, items);
+  handleNavigation(items);
+  onNavigationSuccess(() => handleNavigation(items));
 }
 
 if (unsafeWindow.wkof) {

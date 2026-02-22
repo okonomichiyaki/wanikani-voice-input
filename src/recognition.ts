@@ -44,6 +44,18 @@ export function createRecognition(lang: string, callback: (transcript: string, i
   return recognition;
 }
 
+export function stopRecognition(recognition: SpeechRecognition): void {
+  recognition.onend = () => {};
+  recognition.abort();
+}
+
+export function releaseMicStream(): void {
+  if (persistentStream) {
+    persistentStream.getTracks().forEach(track => track.stop());
+    persistentStream = null;
+  }
+}
+
 export function setLanguage(recognition: SpeechRecognition, newLanguage: string): void {
   if (recognition.lang != newLanguage) {
     recognition.stop();
