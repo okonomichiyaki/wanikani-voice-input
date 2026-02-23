@@ -112,9 +112,8 @@ function meaningMatches(candidate: Candidate, meanings: string[]): string | null
 
 function incorrect(context: WKContext, candidates: Candidate[]): CheckResult {
   return {
-    success: false,
-    error: false,
-    message: 'incorrect answer',
+    candidate: null,
+    answer: null,
     meanings: context.meanings,
     readings: context.readings,
     candidates,
@@ -123,8 +122,6 @@ function incorrect(context: WKContext, candidates: Candidate[]): CheckResult {
 
 function success(context: WKContext, candidates: Candidate[], candidate: Candidate, answer: string): CheckResult {
   return {
-    success: true,
-    message: 'correct answer',
     candidate,
     answer,
     meanings: context.meanings,

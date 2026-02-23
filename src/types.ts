@@ -71,30 +71,10 @@ export interface Transcript {
   matched?: string;
 }
 
-export interface CheckResultSuccess {
-  success: true;
-  error?: false;
-  message: string;
-  candidate: Candidate;
-  answer: string;
+export interface CheckResult {
+  candidate: Candidate | null;
+  answer: string | null;
   meanings: string[];
   readings: string[];
   candidates: Candidate[];
 }
-
-export interface CheckResultIncorrect {
-  success: false;
-  error: false;
-  message: string;
-  meanings: string[];
-  readings: string[];
-  candidates: Candidate[];
-}
-
-export interface CheckResultError {
-  error: true;
-  success?: false;
-  message: string;
-}
-
-export type CheckResult = CheckResultSuccess | CheckResultIncorrect | CheckResultError;

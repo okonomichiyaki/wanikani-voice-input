@@ -77,7 +77,7 @@ function handleSpeechRecognition(
   let answer: string | null = null;
   let command: (() => void) | null = null;
   let lightning = false;
-  let transcript: Transcript = { raw };
+  const transcript: Transcript = { raw };
 
   if (state === 'Ready') {
     const context = wk.getContext(items);
@@ -87,18 +87,16 @@ function handleSpeechRecognition(
 
     const result = checkAnswer(context, transformers, raw);
     console.log('[wanikani-voice-input]', raw, result, context);
-    if ('candidate' in result && result.candidate && transcript.raw !== result.candidate.data) {
+    if (result.candidate && transcript.raw !== result.candidate.data) {
       transcript.matched = result.candidate.data;
     }
-    if ('success' in result && result.success) {
+    if (result.answer) {
       if (final) {
-        answer = (result as { answer: string }).answer;
+        answer = result.answer;
       } else {
         newState = 'Waiting';
-        answer = (result as { answer: string }).answer;
+        answer = result.answer;
       }
-    } else if (result.error) {
-      transcript = { raw: '!! ' + result.message + ' !!' };
     }
   }
   if (state === 'Waiting' && final) {
