@@ -1,3 +1,4 @@
+import { isJapanese } from 'wanakana';
 import { Settings, Transcript } from './types';
 
 function getContainerStyle(settings: Settings): string {
@@ -73,14 +74,25 @@ export function logTranscript(settings: Settings, transcript: Transcript): void 
   }
 
   // insert new transcript:
-  const newText = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : '');
   const current = COUNTER++;
   const id = `transcript-${current}`;
   const el = document.createElement('p') as HTMLParagraphElement & { raw?: string };
   el.raw = transcript.raw;
   el.id = id;
   el.style.cssText = getTranscriptStyle(settings);
-  el.textContent = newText;
+
+  const text = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : '');
+  if (isJapanese(transcript.raw)) {
+    const link = document.createElement('a');
+    link.href = `https://jisho.org/search/${encodeURIComponent(transcript.raw)}`;
+    link.target = '_blank';
+    link.textContent = text;
+    link.style.color = 'inherit';
+    link.style.textDecoration = 'none';
+    el.appendChild(link);
+  } else {
+    el.textContent = text;
+  }
 
   const container = document.querySelector<HTMLDivElement>('div#wanikani-voice-input-transcript-container');
   if (!container) return;
