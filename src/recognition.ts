@@ -26,11 +26,13 @@ export function createRecognition(
   recognition.lang = lang;
 
   recognition.onresult = (event) => {
+    let transcript = '';
+    let isFinal = true;
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript.trim();
-      const final = event.results[i].isFinal;
-      callback(transcript, final);
+      transcript += ' ' + event.results[i][0].transcript.trim();
+      if (!event.results[i].isFinal) isFinal = false;
     }
+    callback(transcript.trim(), isFinal);
   };
 
   recognition.onerror = (event) => {
