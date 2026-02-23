@@ -1,4 +1,4 @@
-import { toHiragana, isJapanese } from 'wanakana';
+import { isJapanese } from 'wanakana';
 import { Candidate } from './types';
 
 export class ConvertWo {
@@ -12,7 +12,7 @@ export class ConvertWo {
     const candidates: Candidate[] = [];
     if (isJapanese(raw) && raw.indexOf('を') >= 0) {
       const chars = raw.split('');
-      const data = chars.map(c => c === 'を' ? 'お' : c).join('');
+      const data = chars.map((c) => (c === 'を' ? 'お' : c)).join('');
       candidates.push({ type: 'convert wo', data });
     }
     return candidates;

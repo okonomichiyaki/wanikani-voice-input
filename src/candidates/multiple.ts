@@ -11,12 +11,12 @@ function lookup(dictionary: Dictionary, s: string): DictionaryEntry[] {
 }
 
 function getReadings(entries: DictionaryEntry[]): string[] {
-  return entries.flatMap(entry => {
+  return entries.flatMap((entry) => {
     if (entry.type === 'word') {
-      return entry['kana'].map(k => toHiragana(k));
+      return entry['kana'].map((k) => toHiragana(k));
     }
     if (entry.type === 'character') {
-      return entry.readings.map(r => {
+      return entry.readings.map((r) => {
         let value = r.value;
         if (value.includes('.')) {
           value = value.split('.')[0];
@@ -41,14 +41,17 @@ export class MultipleWords {
     if (!raw || raw.length === 0) {
       return [];
     }
-    const nospaces = raw.split('').filter(c => c !== ' ').join('');
+    const nospaces = raw
+      .split('')
+      .filter((c) => c !== ' ')
+      .join('');
     if (!isJapanese(nospaces)) {
       return [];
     }
     const candidates: Candidate[] = [];
     if (raw.includes(' ')) {
-      const parts = raw.split(' ').filter(x => x.length > 0);
-      const readings = parts.map(part => {
+      const parts = raw.split(' ').filter((x) => x.length > 0);
+      const readings = parts.map((part) => {
         const hiragana = toHiragana(part);
         const entries = lookup(this.dictionary, hiragana);
         const rs = getReadings(entries);
@@ -58,7 +61,7 @@ export class MultipleWords {
         }
         return '';
       });
-      candidates.push({type: "multiple", data: readings.join('')});
+      candidates.push({ type: 'multiple', data: readings.join('') });
     }
     return candidates;
   }

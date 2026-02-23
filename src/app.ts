@@ -2,7 +2,12 @@ import { checkAnswer } from './flashcards';
 import { createRecognition, setLanguage, acquireMicStream, stopRecognition, releaseMicStream } from './recognition';
 import * as wk from './wanikani';
 import { initializeSettings, getSettings, isLightningOn } from './settings';
-import { createTranscriptContainer, logTranscript, clearTranscript, removeTranscriptContainer } from './live_transcript';
+import {
+  createTranscriptContainer,
+  logTranscript,
+  clearTranscript,
+  removeTranscriptContainer,
+} from './live_transcript';
 import { loadDictionary } from './dict';
 import { ToHiragana } from './candidates/to_hiragana';
 import { ConvertWo } from './candidates/convert_wo';
@@ -10,11 +15,9 @@ import { BasicDictionary } from './candidates/basic_dictionary';
 import { SplitDictionary } from './candidates/split_dictionary';
 import { SuruVerbs } from './candidates/suru_verbs';
 import { RepeatingSubstring } from './candidates/repeating';
-import { FuzzyVowels } from './candidates/fuzzy_vowels';
 import { MultipleWords } from './candidates/multiple';
 import { Numerals } from './candidates/numerals';
-import { WKOFData, WKContext, Settings, Transcript, WKOF, CheckResult } from './types';
-import { Dictionary } from './candidates/types';
+import { WKOFData, WKContext, Transcript, WKOF } from './types';
 
 interface Transformer {
   order: number;
@@ -58,18 +61,25 @@ async function handleNavigation(wkof: WKOF): Promise<void> {
     wkof.include('Menu,Settings');
     await wkof.ready('Menu,Settings');
     await initializeSettings(wkof);
-    startListener(items);
+    void startListener(items);
   }
 }
 
-function handleSpeechRecognition(items: WKOFData, transformers: Transformer[], state: string, commands: Record<string, () => void>, raw: string, final: boolean): SpeechOutcome {
+function handleSpeechRecognition(
+  items: WKOFData,
+  transformers: Transformer[],
+  state: string,
+  commands: Record<string, () => void>,
+  raw: string,
+  final: boolean,
+): SpeechOutcome {
   let newState = state;
   let answer: string | null = null;
   let command: (() => void) | null = null;
   let lightning = false;
-  let transcript: Transcript = {raw};
+  let transcript: Transcript = { raw };
 
-  if (state === "Ready") {
+  if (state === 'Ready') {
     const context = wk.getContext(items);
     if (!context) {
       return { newState, transcript, answer, command, lightning };
@@ -84,18 +94,18 @@ function handleSpeechRecognition(items: WKOFData, transformers: Transformer[], s
       if (final) {
         answer = (result as { answer: string }).answer;
       } else {
-        newState = "Waiting";
+        newState = 'Waiting';
         answer = (result as { answer: string }).answer;
       }
     } else if (result.error) {
-      transcript = { raw: "!! " + result.message + " !!" };
+      transcript = { raw: '!! ' + result.message + ' !!' };
     }
   }
-  if (state === "Waiting" && final) {
-    newState = "Ready";
+  if (state === 'Waiting' && final) {
+    newState = 'Ready';
     lightning = isLightningOn();
   }
-  if (state === "Ready" && final && commands[raw]) {
+  if (state === 'Ready' && final && commands[raw]) {
     command = commands[raw];
   }
 
@@ -106,9 +116,8 @@ async function startListener(items: WKOFData): Promise<void> {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
-  let state = "Ready";
+  let state = 'Ready';
   let context = wk.getContext(items);
-  let result: CheckResult | null = null;
 
   function setState(newState: string): void {
     state = newState;
@@ -116,26 +125,26 @@ async function startListener(items: WKOFData): Promise<void> {
 
   function next(): void {
     wk.clickNext();
-    setState("Ready");
+    setState('Ready');
   }
 
   const commands: Record<string, () => void> = {
-    'wrong': wk.markWrong,
-    'incorrect': wk.markWrong,
-    'mistake': wk.markWrong,
-    '不正解': wk.markWrong,
-    'ふせいかい': wk.markWrong,
-    '間違い': wk.markWrong,
-    'まちがい': wk.markWrong,
-    'だめ': wk.markWrong,
-    'ダメ': wk.markWrong,
-    '駄目': wk.markWrong,
-    'next': next,
-    'つぎ': next,
-    '次': next,
-    'NEXT': next,
-    'ねくすと': next,
-    'ネクスト': next,
+    wrong: wk.markWrong,
+    incorrect: wk.markWrong,
+    mistake: wk.markWrong,
+    不正解: wk.markWrong,
+    ふせいかい: wk.markWrong,
+    間違い: wk.markWrong,
+    まちがい: wk.markWrong,
+    だめ: wk.markWrong,
+    ダメ: wk.markWrong,
+    駄目: wk.markWrong,
+    next: next,
+    つぎ: next,
+    次: next,
+    NEXT: next,
+    ねくすと: next,
+    ネクスト: next,
   };
 
   const transformers: Transformer[] = [
@@ -146,13 +155,13 @@ async function startListener(items: WKOFData): Promise<void> {
     new SuruVerbs(dictionary),
     new RepeatingSubstring(),
     new MultipleWords(dictionary),
-    new Numerals()
+    new Numerals(),
   ];
 
   const lang = wk.getLanguage();
-  const recognition = createRecognition(lang, function(raw: string, final: boolean) {
-    logTranscript(getSettings(), {raw});
-    let outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
+  const recognition = createRecognition(lang, function (raw: string, final: boolean) {
+    logTranscript(getSettings(), { raw });
+    const outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
     logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
@@ -175,7 +184,7 @@ async function startListener(items: WKOFData): Promise<void> {
   });
 
   // watch to trigger language change on next card:
-  function mutationCallback(mutations: MutationRecord[], observer: MutationObserver): void {
+  function mutationCallback(_mutations: MutationRecord[], _observer: MutationObserver): void {
     const lang = wk.getLanguage();
     if (recognition) {
       setLanguage(recognition, lang);
@@ -208,13 +217,13 @@ async function startListener(items: WKOFData): Promise<void> {
       }
     }
   }
-  window.addEventListener("didAnswerQuestion", didAnswerQuestionHandler);
+  window.addEventListener('didAnswerQuestion', didAnswerQuestionHandler);
 
   if (recognition) {
     await acquireMicStream();
     recognition.start();
   }
-  state = "Ready";
+  state = 'Ready';
 
   activeCleanup = () => {
     console.log('[wanikani-voice-input]', 'cleaning up');
@@ -223,14 +232,14 @@ async function startListener(items: WKOFData): Promise<void> {
     }
     releaseMicStream();
     observer.disconnect();
-    window.removeEventListener("didAnswerQuestion", didAnswerQuestionHandler);
+    window.removeEventListener('didAnswerQuestion', didAnswerQuestionHandler);
     removeTranscriptContainer();
   };
 }
 
 if (unsafeWindow.wkof) {
   const wkof = unsafeWindow.wkof;
-  wkof.on_pageload(['/*'], () => handleNavigation(wkof));
+  wkof.on_pageload(['/*'], () => void handleNavigation(wkof));
 } else {
   const script = 'Voice Input';
   const msg = `${script} requires Wanikani Open Framework.\nDo you want to be forwarded to the installation instructions?`;

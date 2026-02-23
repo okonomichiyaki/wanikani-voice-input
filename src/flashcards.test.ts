@@ -13,44 +13,31 @@ test('do not return reading when context is for english', () => {
     category: 'vocabulary',
     type: 'meaning',
     page: 'review',
-    items: []
+    items: [],
   };
   // extracted from jmdict:
   const dictionary: Dictionary = {
-    "せんだい": [
+    せんだい: [
       {
-        "id": "1388080",
-        "type": "word",
-        "kanji": [
-          "先代"
-        ],
-        "kana": [
-          "せんだい"
-        ]
+        id: '1388080',
+        type: 'word',
+        kanji: ['先代'],
+        kana: ['せんだい'],
       },
       {
-        "id": "2164680",
-        "type": "word",
-        "kanji": [
-          "仙台",
-          "仙臺"
-        ],
-        "kana": [
-          "せんだい"
-        ]
-      }
-    ]
+        id: '2164680',
+        type: 'word',
+        kanji: ['仙台', '仙臺'],
+        kana: ['せんだい'],
+      },
+    ],
   };
-  const transformers = [
-    new ToHiragana(),
-    new BasicDictionary(dictionary),
-  ];
+  const transformers = [new ToHiragana(), new BasicDictionary(dictionary)];
   const raw = 'sendai';
   const result = checkAnswer(context, transformers, raw);
   expect('success' in result && result.success).toBe(true);
   expect('answer' in result && result.answer).toBe('sendai');
 });
-
 
 test('levenshtein distance for punctuation', () => {
   const context: WKContext = {
@@ -60,13 +47,10 @@ test('levenshtein distance for punctuation', () => {
     category: 'vocabulary',
     type: 'meaning',
     page: 'review',
-    items: []
+    items: [],
   };
   const dictionary: Dictionary = {};
-  const transformers = [
-    new ToHiragana(),
-    new BasicDictionary(dictionary),
-  ];
+  const transformers = [new ToHiragana(), new BasicDictionary(dictionary)];
   const raw = 'cold-hearted';
   const result = checkAnswer(context, transformers, raw);
   expect('success' in result && result.success).toBe(true);

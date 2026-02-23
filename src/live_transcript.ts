@@ -1,8 +1,9 @@
 import { Settings, Transcript } from './types';
 
 function getContainerStyle(settings: Settings): string {
-  let position = settings.transcript_position;
-  let style = 'width: 100%; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;';
+  const position = settings.transcript_position;
+  let style =
+    'width: 100%; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;';
   if (position === 'top' || position === 'bottom') {
     style = style + ` ${position}: 0px`;
   } else if (position === 'center') {
@@ -12,8 +13,8 @@ function getContainerStyle(settings: Settings): string {
 }
 
 function getTranscriptStyle(settings: Settings): string {
-  let fgcolor = settings.transcript_foreground;
-  let bgcolor = settings.transcript_background;
+  const fgcolor = settings.transcript_foreground;
+  const bgcolor = settings.transcript_background;
   return `color: ${fgcolor}; background-color: ${bgcolor}; font-size: 5vh; pointer-events: auto;`;
 }
 
@@ -51,7 +52,7 @@ function clearTranscriptWith(id: string): void {
 }
 
 function clearTranscriptFn(id: string): () => void {
-  return function() {
+  return function () {
     clearTranscriptWith(id);
   };
 }
@@ -70,7 +71,7 @@ export function logTranscript(settings: Settings, transcript: Transcript): void 
     clearTranscriptWith(`transcript-${COUNTER - 1}`);
   }
 
-  const newText = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
+  const newText = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : '');
   const current = COUNTER++;
   const id = `transcript-${current}`;
   const el = document.createElement('p') as HTMLParagraphElement & { raw?: string };
@@ -79,7 +80,7 @@ export function logTranscript(settings: Settings, transcript: Transcript): void 
   el.style.cssText = getTranscriptStyle(settings);
   el.textContent = newText;
 
-  const container = document.querySelector('div#wanikani-voice-input-transcript-container') as HTMLElement | null;
+  const container = document.querySelector<HTMLDivElement>('div#wanikani-voice-input-transcript-container');
   if (!container) return;
   container.style.cssText = getContainerStyle(settings);
   container.appendChild(el);

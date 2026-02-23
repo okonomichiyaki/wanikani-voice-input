@@ -42,10 +42,10 @@ interface SpeechRecognition extends EventTarget {
   abort(): void;
 }
 
-declare var webkitSpeechRecognition: {
+declare let webkitSpeechRecognition: {
   new (): SpeechRecognition;
 };
 
-declare var process: {
+declare let process: {
   env: Record<string, string | undefined>;
 };

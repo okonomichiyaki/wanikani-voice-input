@@ -4,7 +4,10 @@ import { Numerals } from './numerals';
 const numerals = new Numerals();
 
 function getCandidates(raw: string) {
-  return numerals.getCandidates(raw).map(c => c.data).sort();
+  return numerals
+    .getCandidates(raw)
+    .map((c) => c.data)
+    .sort();
 }
 
 test('convert numerals to characters', () => {

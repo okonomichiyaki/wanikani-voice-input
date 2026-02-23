@@ -1,4 +1,4 @@
-function setupMicButton(): void {
+function _setupMicButton(): void {
   const menu = document.querySelector('div.character-header__menu-navigation');
   if (!menu) return;
   const item = document.createElement('div');
@@ -14,7 +14,7 @@ function setupMicButton(): void {
   icon.classList.add('fa-solid');
   icon.classList.add('fa-microphone');
 
-  link.onclick = function() {
+  link.onclick = function () {
     if (state) {
       icon.classList.remove('fa-solid');
       icon.classList.add('fa-light');

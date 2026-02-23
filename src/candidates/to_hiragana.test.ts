@@ -3,9 +3,11 @@ import { ToHiragana } from './to_hiragana';
 
 const toh = new ToHiragana();
 
-
 function getCandidates(raw: string) {
-  return toh.getCandidates(raw).map(c => c.data).sort();
+  return toh
+    .getCandidates(raw)
+    .map((c) => c.data)
+    .sort();
 }
 
 test('choonpu with hiragana', () => {

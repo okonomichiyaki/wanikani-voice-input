@@ -1,22 +1,114 @@
 import { isJapanese } from 'wanakana';
 import { Candidate } from './types';
 
-const mapping: Record<string, string[]> = (function() {
-  const gojuon = ['あ','い','う','え','い','お','う',
-                  'か','き','く','け','け','こ','こ',
-                  'が','ぎ','ぐ','げ','げ','ご','ご',
-                  'さ','し','す','せ','せ','そ','そ',
-                  'ざ','じ','ず','ぜ','ぜ','ぞ','ぞ',
-                  'た','ち','つ','て','て','と','と',
-                  'だ','ぢ','づ','で','で','ど','ど',
-                  'な','に','ぬ','ね','ね','の','の',
-                  'は','ひ','ふ','へ','へ','ほ','ほ',
-                  'ば','び','ぶ','べ','べ','ぼ','ぼ',
-                  'ぱ','ぴ','ぷ','ぺ','ぺ','ぽ','ぽ',
-                  'ま','み','む','め','め','も','も',
-                  'や','yi','ゆ','ye','ye','よ','よ',
-                  'ら','り','る','れ','れ','ろ','ろ',
-                  'わ','ゐ','wu','ゑ','ゑ','を','を'];
+const mapping: Record<string, string[]> = (function () {
+  const gojuon = [
+    'あ',
+    'い',
+    'う',
+    'え',
+    'い',
+    'お',
+    'う',
+    'か',
+    'き',
+    'く',
+    'け',
+    'け',
+    'こ',
+    'こ',
+    'が',
+    'ぎ',
+    'ぐ',
+    'げ',
+    'げ',
+    'ご',
+    'ご',
+    'さ',
+    'し',
+    'す',
+    'せ',
+    'せ',
+    'そ',
+    'そ',
+    'ざ',
+    'じ',
+    'ず',
+    'ぜ',
+    'ぜ',
+    'ぞ',
+    'ぞ',
+    'た',
+    'ち',
+    'つ',
+    'て',
+    'て',
+    'と',
+    'と',
+    'だ',
+    'ぢ',
+    'づ',
+    'で',
+    'で',
+    'ど',
+    'ど',
+    'な',
+    'に',
+    'ぬ',
+    'ね',
+    'ね',
+    'の',
+    'の',
+    'は',
+    'ひ',
+    'ふ',
+    'へ',
+    'へ',
+    'ほ',
+    'ほ',
+    'ば',
+    'び',
+    'ぶ',
+    'べ',
+    'べ',
+    'ぼ',
+    'ぼ',
+    'ぱ',
+    'ぴ',
+    'ぷ',
+    'ぺ',
+    'ぺ',
+    'ぽ',
+    'ぽ',
+    'ま',
+    'み',
+    'む',
+    'め',
+    'め',
+    'も',
+    'も',
+    'や',
+    'yi',
+    'ゆ',
+    'ye',
+    'ye',
+    'よ',
+    'よ',
+    'ら',
+    'り',
+    'る',
+    'れ',
+    'れ',
+    'ろ',
+    'ろ',
+    'わ',
+    'ゐ',
+    'wu',
+    'ゑ',
+    'ゑ',
+    'を',
+    'を',
+  ];
   const chunkSize = 7;
   const chunks: string[][] = [];
   for (let i = 0; i < gojuon.length; i += chunkSize) {
@@ -37,7 +129,7 @@ const mapping: Record<string, string[]> = (function() {
 })();
 
 function removeCharAt(s: string, i: number): string {
-  var tmp = s.split('');
+  const tmp = s.split('');
   tmp.splice(i, 1);
   return tmp.join('');
 }
@@ -52,7 +144,7 @@ function insert(s: string, i: number, t: string): string {
 function matchingVowel(c: string, v: string): boolean {
   const vowels = mapping[c];
   if (vowels) {
-    return vowels.some(x => v === x);
+    return vowels.some((x) => v === x);
   }
   return false;
 }
@@ -71,15 +163,15 @@ export class FuzzyVowels {
     const candidates: Candidate[] = [];
     for (let i = 0; i < raw.length; i++) {
       const c = raw.charAt(i);
-      const n = raw.charAt(i+1);
+      const n = raw.charAt(i + 1);
       if (matchingVowel(c, n)) {
-        const candidate: Candidate = {type: 'fuzzy', data: removeCharAt(raw, i+1)};
+        const candidate: Candidate = { type: 'fuzzy', data: removeCharAt(raw, i + 1) };
         candidates.push(candidate);
       } else {
         const vowels = mapping[c] || [];
         for (const v of vowels) {
           if (v !== c) {
-            const candidate: Candidate = {type: 'fuzzy', data: insert(raw, i+1, v)};
+            const candidate: Candidate = { type: 'fuzzy', data: insert(raw, i + 1, v) };
             candidates.push(candidate);
           }
         }

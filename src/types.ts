@@ -53,12 +53,7 @@ export interface WKOF {
   ready(modules: string): Promise<void>;
   settings: Record<string, Settings>;
   Menu: {
-    insert_script_link(config: {
-      name: string;
-      submenu: string;
-      title: string;
-      on_click: () => void;
-    }): void;
+    insert_script_link(config: { name: string; submenu: string; title: string; on_click: () => void }): void;
   };
   Settings: {
     new (config: object): { open(): void };

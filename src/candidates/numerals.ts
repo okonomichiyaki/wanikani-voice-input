@@ -4,7 +4,7 @@ import { isJapanese } from 'wanakana';
 import { Candidate } from './types';
 
 function anyJapanese(s: string): boolean {
-  return s.split('').some(c => isJapanese(c));
+  return s.split('').some((c) => isJapanese(c));
 }
 
 export class Numerals {
@@ -25,15 +25,15 @@ export class Numerals {
 
     if (!anyJapanese(raw)) {
       const toWords = new ToWords();
-      let converted = toWords.convert(Number(part));
-      let data = raw.replace(part, converted);
-      candidates.push({data, type});
+      const converted = toWords.convert(Number(part));
+      const data = raw.replace(part, converted);
+      candidates.push({ data, type });
     }
 
     if (raw === part || anyJapanese(raw)) {
-      let converted = kansuji(part);
-      let data = raw.replace(part, converted);
-      candidates.push({data, type});
+      const converted = kansuji(part);
+      const data = raw.replace(part, converted);
+      candidates.push({ data, type });
     }
 
     return candidates;

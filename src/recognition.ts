@@ -11,7 +11,10 @@ export async function acquireMicStream(): Promise<void> {
   }
 }
 
-export function createRecognition(lang: string, callback: (transcript: string, isFinal: boolean) => void): SpeechRecognition | null {
+export function createRecognition(
+  lang: string,
+  callback: (transcript: string, isFinal: boolean) => void,
+): SpeechRecognition | null {
   if (!('webkitSpeechRecognition' in window)) {
     console.error('[wanikani-voice-input] web speech not supported by this browser!');
     return null;
@@ -51,7 +54,7 @@ export function stopRecognition(recognition: SpeechRecognition): void {
 
 export function releaseMicStream(): void {
   if (persistentStream) {
-    persistentStream.getTracks().forEach(track => track.stop());
+    persistentStream.getTracks().forEach((track) => track.stop());
     persistentStream = null;
   }
 }

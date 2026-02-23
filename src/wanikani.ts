@@ -25,7 +25,7 @@ export function checkDom(): void {
 function getCategory(): string | null {
   const category = document.querySelector(Selectors.Category);
   if (category) {
-    return category.textContent!.trim().toLowerCase();
+    return category.textContent.trim().toLowerCase();
   }
   if (document.location.href.match('vocabulary')) {
     return 'vocabulary';
@@ -43,7 +43,7 @@ function getCategory(): string | null {
 function getType(): string | null {
   const type = document.querySelector(Selectors.Type);
   if (type) {
-    return type.textContent!.trim().toLowerCase();
+    return type.textContent.trim().toLowerCase();
   }
   if (document.location.href.match('#reading')) {
     return 'reading';
@@ -65,10 +65,10 @@ function getType(): string | null {
 
 export function getLanguage(): string {
   const t = getType();
-  if (t === "meaning" || t === "name") {
+  if (t === 'meaning' || t === 'name') {
     return 'en-US';
   }
-  if (t === "reading") {
+  if (t === 'reading') {
     return 'ja-JP';
   }
   return 'en-US';
@@ -80,7 +80,7 @@ function getPromptFromEntry(): string | null {
   if (!el) {
     return null;
   }
-  let prompt = el.textContent;
+  const prompt = el.textContent;
   if (prompt === '') {
     return null;
   }
@@ -105,25 +105,25 @@ export function getPrompt(): string | null {
 
 function getMeaningsFromItems(items: WKOFItem[]): string[] {
   const meanings: WKOFItemMeaning[] = [];
-  for (let item of items) {
+  for (const item of items) {
     if (item && item.data && item.data.meanings) {
-      meanings.push(...item.data.meanings.filter(m => m.accepted_answer));
+      meanings.push(...item.data.meanings.filter((m) => m.accepted_answer));
     }
     if (item && item.data && item.data.auxiliary_meanings) {
-      meanings.push(...item.data.auxiliary_meanings.filter(m => m.accepted_answer));
+      meanings.push(...item.data.auxiliary_meanings.filter((m) => m.accepted_answer));
     }
   }
-  return meanings.map(m => m.meaning);
+  return meanings.map((m) => m.meaning);
 }
 
 function getReadingsFromItems(items: WKOFItem[]): string[] {
   const readings: WKOFItemReading[] = [];
-  for (let item of items) {
+  for (const item of items) {
     if (item && item.data && item.data.readings) {
-      readings.push(...item.data.readings.filter(r => r.accepted_answer));
+      readings.push(...item.data.readings.filter((r) => r.accepted_answer));
     }
   }
-  return readings.map(r => r.reading);
+  return readings.map((r) => r.reading);
 }
 
 // flashcard "backs" for this card
@@ -134,7 +134,7 @@ function getItems(allItems: WKOFData, category: string | null, slug: string | nu
     const type_index = wkof.ItemData.get_index(allItems, 'item_type');
     const index = type_index[category as string];
     if (index) {
-      items.push(...index.filter(i => i.data.slug === slug || i.data.characters === slug));
+      items.push(...index.filter((i) => i.data.slug === slug || i.data.characters === slug));
     }
   }
   return items;
@@ -171,7 +171,7 @@ export function getContext(allItems: WKOFData): WKContext | null {
     return null;
   }
   const prompt = getPrompt();
-  var category = getCategory();
+  let category = getCategory();
   if (category === 'vocabulary' && prompt && isKana(prompt)) {
     category = 'kana_vocabulary';
   }
@@ -198,7 +198,8 @@ export function didContextChange(oldContext: WKContext | null, newContext: WKCon
 export function getUserSynonyms(id: number): string[] {
   const script = document.querySelector(Selectors.Synonyms);
   if (script) {
-    const data: Record<string, string[]> = JSON.parse(script.textContent!);
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const data: Record<string, string[]> = JSON.parse(script.textContent);
     if (data[id]) {
       return data[id];
     }
@@ -207,7 +208,7 @@ export function getUserSynonyms(id: number): string[] {
 }
 
 export function clickNext(): boolean {
-  const button = document.querySelector(Selectors.Next) as HTMLElement | null;
+  const button = document.querySelector<HTMLElement>(Selectors.Next);
   if (button) {
     button.click();
     return true;
@@ -217,12 +218,12 @@ export function clickNext(): boolean {
 
 export function markWrong(): void {
   const lang = getLanguage();
-  const incorrect = lang === "en-US" ? "aaa" : "あああ";
+  const incorrect = lang === 'en-US' ? 'aaa' : 'あああ';
   submitAnswer(incorrect);
 }
 
 export function inputAnswer(input: string): void {
-  const userResponse = document.querySelector('#user-response') as HTMLInputElement | null;
+  const userResponse = document.querySelector('#user-response');
   if (userResponse) {
     userResponse.value = input;
   }
@@ -239,13 +240,13 @@ function isNotAlreadyOpen(): boolean {
     return true;
   }
   const classes = new Array(info.classList);
-  return !classes.some(c => c.toString().includes('open'));
+  return !classes.some((c) => c.toString().includes('open'));
 }
 
 export function clickInfo(): void {
   const menuItems = document.querySelectorAll('#additional-content a');
-  for (let item of menuItems) {
-    if (item.textContent!.includes("Item Info")) {
+  for (const item of menuItems) {
+    if (item.textContent.includes('Item Info')) {
       if (isNotAlreadyOpen()) {
         (item as HTMLElement).click();
       }
@@ -256,12 +257,17 @@ export function clickInfo(): void {
 
 /* inspects event from `didAnswerQuestion` and returns true if question passed */
 export function didAnswerCorrectly(e: Event): boolean {
-  const detail = (e as CustomEvent).detail;
-  if (typeof detail !== 'object' || typeof detail.results !== 'object') {
+  const detail: unknown = (e as CustomEvent).detail;
+  if (
+    typeof detail !== 'object' ||
+    detail === null ||
+    !('results' in detail) ||
+    typeof (detail as Record<string, unknown>).results !== 'object'
+  ) {
     console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
     return false;
   }
-  const results = detail.results;
+  const results = (detail as { results: Record<string, unknown> }).results;
   if (typeof results.action !== 'string') {
     console.error('[wanikani-voice-input] didAnswerCorrectly got unexpected event, WaniKani code change?', e);
     return false;

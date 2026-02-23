@@ -17,8 +17,8 @@ export class SuruVerbs {
     if (hiragana.endsWith('する')) {
       const root = hiragana.substring(0, hiragana.length - 2);
       const readings = this.basicDictionary.getCandidates(root);
-      for (let r of readings) {
-        candidates.push({type: "する", data: r.data + 'する'});
+      for (const r of readings) {
+        candidates.push({ type: 'する', data: r.data + 'する' });
       }
     }
     return candidates;

@@ -12,7 +12,7 @@ export class ToHiragana {
     const candidates: Candidate[] = [];
     if (isJapanese(raw)) {
       const hiragana = toHiragana(raw, { convertLongVowelMark: true });
-      candidates.push({"type": "hiragana", data: hiragana});
+      candidates.push({ type: 'hiragana', data: hiragana });
     }
     return candidates;
   }

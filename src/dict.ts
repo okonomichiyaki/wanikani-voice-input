@@ -8,9 +8,9 @@ function addEntry(dictionary: Dictionary, key: string, entries: DictionaryEntry[
 }
 
 export function loadDictionary(): Dictionary {
-  let words: Record<string, DictionaryEntry[]> = JSON.parse(GM_getResourceText("jmdict"));
-  let kanji: Record<string, DictionaryEntry[]> = JSON.parse(GM_getResourceText("kanjidic2"));
-  let dictionary: Dictionary = {};
+  const words = JSON.parse(GM_getResourceText('jmdict')) as Record<string, DictionaryEntry[]>;
+  const kanji = JSON.parse(GM_getResourceText('kanjidic2')) as Record<string, DictionaryEntry[]>;
+  const dictionary: Dictionary = {};
   for (const [k, v] of Object.entries(words)) {
     addEntry(dictionary, k, v);
   }

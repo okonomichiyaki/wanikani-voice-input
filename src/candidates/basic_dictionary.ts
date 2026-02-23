@@ -11,12 +11,12 @@ function lookup(dictionary: Dictionary, s: string): DictionaryEntry[] {
 }
 
 function getReadings(entries: DictionaryEntry[]): string[] {
-  return entries.flatMap(entry => {
+  return entries.flatMap((entry) => {
     if (entry.type === 'word') {
-      return entry['kana'].map(k => toHiragana(k));
+      return entry['kana'].map((k) => toHiragana(k));
     }
     if (entry.type === 'character') {
-      return entry.readings.map(r => {
+      return entry.readings.map((r) => {
         let value = r.value;
         if (value.includes('.')) {
           value = value.split('.')[0];
@@ -45,8 +45,8 @@ export class BasicDictionary {
     const hiragana = toHiragana(raw);
     const entries = lookup(this.dictionary, hiragana);
     const rs = getReadings(entries);
-    for (let r of rs) {
-      candidates.push({type: "dictionary", data: r});
+    for (const r of rs) {
+      candidates.push({ type: 'dictionary', data: r });
     }
     return candidates;
   }

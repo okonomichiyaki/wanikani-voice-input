@@ -1,10 +1,10 @@
-import { toHiragana, isKana, isKanji } from 'wanakana';
+import { isKana, isKanji } from 'wanakana';
 import { BasicDictionary } from './basic_dictionary';
 import { Candidate, Dictionary } from './types';
 
 function takeWhile(xs: string[], f: (x: string) => boolean): string[] {
   const result: string[] = [];
-  for (let x of xs) {
+  for (const x of xs) {
     if (f(x)) {
       result.push(x);
     } else {
@@ -22,8 +22,6 @@ function dropWhile(xs: string[], f: (x: string) => boolean): string[] {
   return xs.slice(i, xs.length);
 }
 
-
-
 export class SplitDictionary {
   order: number;
   basicDictionary: BasicDictionary;
@@ -39,13 +37,13 @@ export class SplitDictionary {
     const chars = raw.split('');
     const kanaPre = takeWhile(chars, isKana).join('');
     const kanjiPost = dropWhile(chars, isKana).join('');
-    for (let c of this.basicDictionary.getCandidates(kanjiPost)) {
-      candidates.push({type: 'split dictionary', data: kanaPre + c.data});
+    for (const c of this.basicDictionary.getCandidates(kanjiPost)) {
+      candidates.push({ type: 'split dictionary', data: kanaPre + c.data });
     }
     const kanjiPre = takeWhile(chars, isKanji).join('');
     const kanaPost = dropWhile(chars, isKanji).join('');
-    for (let c of this.basicDictionary.getCandidates(kanjiPre)) {
-      candidates.push({type: 'split dictionary', data: c.data + kanaPost});
+    for (const c of this.basicDictionary.getCandidates(kanjiPre)) {
+      candidates.push({ type: 'split dictionary', data: c.data + kanaPost });
     }
 
     return candidates;

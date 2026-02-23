@@ -3,9 +3,8 @@ import { ConvertWo } from './convert_wo';
 
 const cw = new ConvertWo();
 
-
 function getCandidates(raw: string) {
-  return cw.getCandidates(raw).map(c => c.data);
+  return cw.getCandidates(raw).map((c) => c.data);
 }
 
 test('particle wo present', () => {
