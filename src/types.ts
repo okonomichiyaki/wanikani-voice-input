@@ -68,6 +68,7 @@ export interface WKOF {
 
 export interface Transcript {
   raw: string;
+  final: boolean;
   matched?: string;
 }
 

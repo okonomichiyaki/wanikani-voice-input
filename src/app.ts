@@ -70,14 +70,13 @@ function handleSpeechRecognition(
   transformers: Transformer[],
   state: string,
   commands: Record<string, () => void>,
-  raw: string,
-  final: boolean,
+  transcript: Transcript,
 ): SpeechOutcome {
   let newState = state;
   let answer: string | null = null;
   let command: (() => void) | null = null;
   let lightning = false;
-  const transcript: Transcript = { raw };
+  const { raw, final } = transcript;
 
   if (state === 'Ready') {
     const context = wk.getContext(items);
@@ -86,7 +85,7 @@ function handleSpeechRecognition(
     }
 
     const result = checkAnswer(context, transformers, raw);
-    console.log('[wanikani-voice-input]', raw, result, context);
+    console.log('[wanikani-voice-input]', transcript, result, context);
     if (result.candidate && transcript.raw !== result.candidate.data) {
       transcript.matched = result.candidate.data;
     }
@@ -158,8 +157,8 @@ async function startListener(items: WKOFData): Promise<void> {
 
   const lang = wk.getLanguage();
   const recognition = createRecognition(lang, function (raw: string, final: boolean) {
-    logTranscript(getSettings(), { raw });
-    const outcome = handleSpeechRecognition(items, transformers, state, commands, raw, final);
+    logTranscript(getSettings(), { raw, final });
+    const outcome = handleSpeechRecognition(items, transformers, state, commands, { raw, final });
     logTranscript(getSettings(), outcome.transcript);
     if (state !== outcome.newState) {
       setState(outcome.newState);
