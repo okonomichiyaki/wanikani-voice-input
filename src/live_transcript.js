@@ -56,14 +56,16 @@ export function logTranscript(settings, transcript) {
   }
   const previous = document.getElementById(`transcript-${COUNTER - 1}`);
 
-  // handle overwriting (or not) previous transcript without (or with) match:
+  // prevents spamming duplicate transcripts from the same utterance when web speech API sends duplicate data
   if (previous && transcript.raw === previous.raw && !transcript.matched) {
     return;
   }
+  // replacing the previous transcript with the latest if it includes a matched reading
   if (previous && transcript.raw === previous.raw && transcript.matched) {
     clearTranscriptWith(`transcript-${COUNTER - 1}`);
   }
 
+  // insert new transcript:
   const newText = '🎤' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
   const current = COUNTER++;
   const id = `transcript-${current}`;
