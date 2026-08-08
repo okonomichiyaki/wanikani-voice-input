@@ -1,5 +1,5 @@
 import {checkAnswer} from './flashcards.js';
-import {createRecognition, setLanguage} from './recognition.js';
+import { createRecognition, setLanguage, acquireMicStream } from './recognition';
 import * as wk from './wanikani.js';
 import { initializeSettings, getSettings, isLightningOn } from './settings.js';
 import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript.js';
@@ -65,7 +65,7 @@ function handleSpeechRecognition(items, transformers, state, commands, raw, fina
   return { newState, transcript, answer, command, lightning };
 }
 
-function startListener(items) {
+async function startListener(items) {
   createTranscriptContainer(getSettings());
   const dictionary = loadDictionary();
 
@@ -171,6 +171,7 @@ function startListener(items) {
     }
   });
 
+  await acquireMicStream();
   recognition.start();
   state = "Ready";
 };

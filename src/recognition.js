@@ -41,3 +41,15 @@ export function setLanguage(recognition, newLanguage) {
     recognition.lang = newLanguage;
   }
 }
+
+// keep a persistent mic stream so macOS doesn't flicker the mic indicator every time SpeechRecognition internally stops/restarts
+let persistentStream;
+
+export async function acquireMicStream() {
+  if (persistentStream) return;
+  try {
+    persistentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    console.error('[wanikani-voice-input] failed to acquire persistent mic stream:', e);
+  }
+}
