@@ -1,9 +1,10 @@
-import {checkAnswer} from './flashcards.js';
-import { createRecognition, setLanguage, acquireMicStream } from './recognition';
+import { checkAnswer } from './flashcards.js';
+import { createRecognition, setLanguage, acquireMicStream, stopRecognition, releaseMicStream } from './recognition';
 import * as wk from './wanikani.js';
 import { initializeSettings, getSettings, isLightningOn } from './settings.js';
-import { createTranscriptContainer, logTranscript, clearTranscript } from './live_transcript.js';
+import { createTranscriptContainer, logTranscript, clearTranscript, removeTranscriptContainer } from './live_transcript.js';
 import { loadDictionary } from './dict.js';
+import { onNavigationSuccess } from './navigation.js';
 
 import { ToHiragana } from './candidates/to_hiragana.js';
 import { ConvertWo } from './candidates/convert_wo.js';
@@ -15,18 +16,28 @@ import { FuzzyVowels } from './candidates/fuzzy_vowels.js';
 import { MultipleWords } from './candidates/multiple.js';
 import { Numerals } from './candidates/numerals.js';
 
-function onStart(settings, items) {
-  const context = wk.getContext(items);
-  if (!context) {
-    return;
-  }
+let activeCleanup = null;
+
+function isRelevantPage(context) {
   if (context.page === 'review' || context.page === 'lesson' || context.page === 'quiz') {
-    startListener(items);
+    return true;
   }
   if (context.page === 'entry' && process.env.NODE_ENV !== 'production') {
-    startListener(items);
+    return true;
   }
+  return false;
 }
+
+function handleNavigation(items) {
+  const context = wk.getContext(items);
+
+  if (context && isRelevantPage(context) && !activeCleanup) {
+     startListener(items);
+  } else if (!context && activeCleanup) {
+    activeCleanup();
+    activeCleanup = null;
+   }
+ }
 
 function handleSpeechRecognition(items, transformers, state, commands, raw, final) {
   let newState = state;
@@ -159,7 +170,7 @@ async function startListener(items) {
   observer.observe(document.body, config);
 
   // lightning mode and auto show info on wrong:
-  window.addEventListener("didAnswerQuestion", function(e) {
+  function didAnswerQuestionHandler(e) {
     if (wk.didAnswerCorrectly(e)) {
       if (isLightningOn()) {
         setTimeout(wk.clickNext, getSettings().lightning_delay * 1000);
@@ -169,11 +180,22 @@ async function startListener(items) {
         setTimeout(wk.clickInfo, getSettings().mistake_delay * 1000);
       }
     }
-  });
+  }
+  window.addEventListener("didAnswerQuestion", didAnswerQuestionHandler);
 
   await acquireMicStream();
   recognition.start();
   state = "Ready";
+
+  activeCleanup = () => {
+    if (recognition) {
+      stopRecognition(recognition);
+    }
+    releaseMicStream();
+    observer.disconnect();
+    window.removeEventListener("didAnswerQuestion", didAnswerQuestionHandler);
+    removeTranscriptContainer();
+  };
 };
 
 async function loadWkof(wkof) {
@@ -181,7 +203,8 @@ async function loadWkof(wkof) {
   await wkof.ready('Menu,Settings,ItemData');
   const settings = initializeSettings(wkof);
   const items = await wkof.ItemData.get_items();
-  onStart(settings, items);
+  handleNavigation(items);
+  onNavigationSuccess(() => handleNavigation(items));
 }
 
 if (unsafeWindow.wkof) {

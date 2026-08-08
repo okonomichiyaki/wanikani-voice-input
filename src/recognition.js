@@ -53,3 +53,15 @@ export async function acquireMicStream() {
     console.error('[wanikani-voice-input] failed to acquire persistent mic stream:', e);
   }
 }
+
+export function stopRecognition(recognition) {
+  recognition.onend = () => {};
+  recognition.abort();
+}
+
+export function releaseMicStream() {
+  if (persistentStream) {
+    persistentStream.getTracks().forEach(track => track.stop());
+    persistentStream = null;
+  }
+}
