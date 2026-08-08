@@ -14,3 +14,7 @@ test('particle wo present', () => {
 test('particle wo absent', () => {
   expect(getCandidates('みさお').sort()).toStrictEqual([]);
 });
+
+test('particle wo first char', () => {
+  expect(getCandidates('を')).toStrictEqual(['お']);
+});
