@@ -1,3 +1,5 @@
+import { isJapanese } from 'wanakana';
+
 function getContainerStyle(settings) {
   let position = settings.transcript_position;
   let style = 'width: 100%; position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none;';
@@ -66,14 +68,25 @@ export function logTranscript(settings, transcript) {
   }
 
   // insert new transcript:
-  const newText = '🎤' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : "");
   const current = COUNTER++;
   const id = `transcript-${current}`;
   const el = document.createElement('p');
   el.raw = transcript.raw;
   el.id = id;
   el.style = getTranscriptStyle(settings);
-  el.textContent = newText;
+
+  const text = '\u{1F3A4}' + transcript.raw + (transcript.matched ? ` (${transcript.matched})` : '');
+  if (isJapanese(transcript.raw)) {
+    const link = document.createElement('a');
+    link.href = `https://jisho.org/search/${encodeURIComponent(transcript.raw)}`;
+    link.target = '_blank';
+    link.textContent = text;
+    link.style.color = 'inherit';
+    link.style.textDecoration = 'none';
+    el.appendChild(link);
+  } else {
+    el.textContent = text;
+  }
 
   const container = document.querySelector('div#wanikani-voice-input-transcript-container');
   container.style = getContainerStyle(settings);
