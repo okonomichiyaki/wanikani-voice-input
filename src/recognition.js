@@ -12,13 +12,18 @@ export function createRecognition(lang, callback) {
   recognition.lang = lang;
 
   recognition.onresult = (event) => {
-    //console.info('[wanikani-voice-input] onresult', event);
+    let transcript = '';
+    let isFinal = true;
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
-      const transcript = event.results[i][0].transcript.trim();
-      const final = event.results[i].isFinal;
-      callback(transcript, final);
+      transcript += ' ' + event.results[i][0].transcript.trim();
+      if (!event.results[i].isFinal) {
+        isFinal = false;
+      }
     }
+    transcript = transcript.trim();
+    //console.info('[wanikani-voice-input] onresult', transcript, event);
+    callback(transcript, isFinal);
   };
 
   recognition.onerror = (event) => {
