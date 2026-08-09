@@ -4,16 +4,21 @@ Userscript for WaniKani to enable reviews and lessons via voice input using WebS
 
 # development
 
-release checklist:
+1. install [this local script](https://github.com/okonomichiyaki/wanikani-voice-input/raw/refs/heads/latest/development/wanikani-voice-input-dev.user.js) and modify the @require path to point to your local clone
+2. build: `rm dist/app*; yarn parcel build`
+3. browser should now load the latest local build
+
+# release:
 
 1. build `rm dist/app*; yarn parcel build`
-2. test: reviews, lessons, extra study, recent mistakes
-3. find and replace tag in userscript:
-`OLD=$(grep version dist/wanikani-voice-input.user.js | grep -o "[[:digit:]\.]\+")`
+2. test (using local development script): reviews, lessons, extra study, recent mistakes
+3. find and replace previous tag in userscript:
+`OLD=$(grep version release/wanikani-voice-input.user.js | grep -o "[[:digit:]\.]\+")`
 `NEW=x.y.z`
-`sed -i "" "s/$OLD/$NEW/g" dist/wanikani-voice-input.user.js`
-4. git add: `git add -f dist/app.js dist/wanikani-voice-input.user.js`
+`sed -i "" "s/$OLD/$NEW/g" release/wanikani-voice-input.user.js`
+4. copy to release dir: `cp dist/* release`
+4. git add: `git add release/app.js release/wanikani-voice-input.user.js`
 5. git commit
-6. git tag
+6. git tag $NEW
 7. git push
-8. update `latest` branch
+8. update `latest` branch to point to $NEW
